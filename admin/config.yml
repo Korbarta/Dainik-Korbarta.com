@@ -1,0 +1,48 @@
+backend:
+  name: git-gateway
+  branch: main
+
+publish_mode: simple
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+locale: "en"
+
+collections:
+  - name: "articles"
+    label: "সংবাদ"
+    files:
+      - file: "content/articles.json"
+        label: "সকল সংবাদ পরিচালনা করুন"
+        name: "articles"
+        fields:
+          - label: "সংবাদসমূহ"
+            name: "articles"
+            widget: "list"
+            summary: "{{title}}"
+            fields:
+              - {label: "শিরোনাম", name: "title", widget: "string"}
+              - {label: "প্রকাশের তারিখ ও সময়", name: "date", widget: "datetime"}
+              - label: "বিভাগ"
+                name: "category"
+                widget: "select"
+                options: ["জাতীয়","আন্তর্জাতিক","অর্থনীতি","খেলা","বিনোদন","মতামত"]
+              - {label: "ছবি (ঐচ্ছিক)", name: "image", widget: "image", required: false}
+              - {label: "সংক্ষিপ্তসার", name: "excerpt", widget: "text"}
+              - {label: "বিস্তারিত সংবাদ", name: "body", widget: "text"}
+              - {label: "প্রধান সংবাদ হিসেবে দেখান", name: "featured", widget: "boolean", default: false}
+
+  - name: "settings"
+    label: "সেটিংস"
+    files:
+      - file: "content/settings.json"
+        label: "সাধারণ সেটিংস"
+        name: "settings"
+        fields:
+          - {label: "পত্রিকার নাম", name: "site_title", widget: "string"}
+          - {label: "ট্যাগলাইন", name: "tagline", widget: "string"}
+          - label: "ব্রেকিং নিউজ"
+            name: "breaking_news"
+            widget: "list"
+            fields:
+              - {label: "বার্তা", name: "text", widget: "string"}
