@@ -1,78 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>দৈনিক করবার্তা — সত্যের সন্ধানে, প্রতিদিন</title>
-<meta name="description" content="দৈনিক করবার্তা — জাতীয়, আন্তর্জাতিক, অর্থনীতি, খেলা ও বিনোদনের সর্বশেষ সংবাদ।">
-<meta name="google-site-verification" content="8tboAChIoZzloWH1JDjBZmFQDDQvD6vwhLBGx9rKYYI" />
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>সম্পাদকীয় প্যানেল — দৈনিক করবার্তা</title>
 </head>
 <body>
-<a href="#main-content" class="skip-link">মূল কনটেন্টে যান</a>
-
-<div class="topbar">
-  <div class="wrap">
-    <span class="date" id="today-date"></span>
-    <span>ই-পেপার সংস্করণ</span>
-  </div>
-</div>
-
-<header class="masthead">
-  <div class="wrap">
-    <h1 id="site-title">দৈনিক করবার্তা</h1>
-    <p class="tagline" id="site-tagline">সত্যের সন্ধানে, প্রতিদিন</p>
-  </div>
-</header>
-
-<nav class="catnav" aria-label="বিভাগ">
-  <div class="wrap" id="cat-nav"></div>
-</nav>
-
-<div class="ticker">
-  <div class="wrap">
-    <span class="tag">ব্রেকিং</span>
-    <div class="ticker-track"><ul id="ticker-list"></ul></div>
-  </div>
-</div>
-
-<main id="main-content">
-  <div class="wrap layout">
-    <div>
-      <div id="lead-story"></div>
-      <div id="article-grid" class="grid"></div>
-    </div>
-
-    <aside class="sidebar">
-      <h4>সর্বাধিক পঠিত</h4>
-      <div id="most-read"></div>
-    </aside>
-  </div>
-</main>
-
-<footer>
-  <div class="wrap">
-    <span id="footer-title">© <span id="year"></span> দৈনিক করবার্তা — সর্বস্বত্ব সংরক্ষিত</span>
-    <a href="/admin/">সম্পাদকীয় প্যানেল</a>
-  </div>
-</footer>
-
-<div class="overlay" id="overlay">
-  <div class="article-panel">
-    <button class="close-btn" id="close-btn" aria-label="বন্ধ করুন">✕</button>
-    <div id="article-detail"></div>
-  </div>
-</div>
-
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script>
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => {});
-    window.netlifyIdentity.on("login", () => {
-      document.location.href = "/admin/";
-    });
-  }
-</script>
-<script src="script.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", user => {
+        if (!user) {
+          window.netlifyIdentity.on("login", () => { document.location.href = "/admin/"; });
+        }
+      });
+    }
+  </script>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 </body>
 </html>
