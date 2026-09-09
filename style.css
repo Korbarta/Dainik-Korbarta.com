@@ -1,0 +1,130 @@
+/* ===== দৈনিক করবার্তা — Design tokens =====
+   Paper:   #FAF8F3
+   Ink:     #1C1A17
+   Maroon:  #7A1F2B  (masthead / accent)
+   Gold:    #A9812F  (rule lines / secondary accent)
+   Mute:    #6E6A63  (meta text)
+   Headline font: 'Noto Serif Bengali'
+   Body/UI font:  'Hind Siliguri'
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+
+:root{
+  --paper:#FAF8F3;
+  --paper-dim:#F1EEE5;
+  --ink:#1C1A17;
+  --maroon:#7A1F2B;
+  --maroon-dim:#5c1620;
+  --gold:#A9812F;
+  --mute:#6E6A63;
+  --line:#DAD4C4;
+  --max:1180px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Hind Siliguri',sans-serif;
+  line-height:1.6;
+}
+h1,h2,h3,h4,.headline-font{
+  font-family:'Noto Serif Bengali',serif;
+  margin:0;
+  color:var(--ink);
+}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px;}
+
+/* skip link for keyboard users */
+.skip-link{position:absolute;left:-999px;top:0;background:var(--ink);color:var(--paper);padding:10px 16px;z-index:200;}
+.skip-link:focus{left:12px;top:12px;}
+
+/* ===== Top bar ===== */
+.topbar{background:var(--ink);color:var(--paper-dim);font-size:.85rem;}
+.topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding:7px 20px;flex-wrap:wrap;gap:6px;}
+.topbar .date{color:#c9c4b8;}
+
+/* ===== Masthead ===== */
+.masthead{padding:28px 0 18px;text-align:center;border-bottom:4px solid var(--ink);}
+.masthead h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:.5px;}
+.masthead .tagline{color:var(--maroon);font-weight:600;margin-top:6px;font-family:'Hind Siliguri',sans-serif;letter-spacing:.3px;}
+
+/* ===== Nav ===== */
+nav.catnav{background:var(--maroon);}
+nav.catnav .wrap{display:flex;gap:2px;overflow-x:auto;}
+nav.catnav button{
+  background:transparent;border:none;color:#f2e4e4;
+  font-family:'Hind Siliguri',sans-serif;font-size:1rem;font-weight:600;
+  padding:12px 16px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+}
+nav.catnav button:hover,nav.catnav button:focus-visible{background:var(--maroon-dim);}
+nav.catnav button.active{border-bottom-color:var(--gold);color:#fff;}
+
+/* ===== Ticker ===== */
+.ticker{background:var(--paper-dim);border-bottom:1px solid var(--line);overflow:hidden;}
+.ticker .wrap{display:flex;align-items:center;padding:0;gap:14px;}
+.ticker .tag{background:var(--maroon);color:#fff;font-weight:700;padding:8px 14px;flex:none;font-size:.9rem;}
+.ticker-track{white-space:nowrap;overflow:hidden;flex:1;position:relative;height:38px;}
+.ticker-track ul{list-style:none;margin:0;padding:0;position:absolute;display:flex;gap:60px;animation:scroll-left 28s linear infinite;align-items:center;height:38px;}
+.ticker-track li{font-size:.92rem;color:var(--ink);}
+@keyframes scroll-left{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@media (prefers-reduced-motion: reduce){.ticker-track ul{animation:none;}}
+
+/* ===== Layout ===== */
+main{padding:26px 0 60px;}
+.layout{display:grid;grid-template-columns:2.2fr 1fr;gap:34px;}
+@media (max-width:860px){.layout{grid-template-columns:1fr;}}
+
+/* Lead story */
+.lead{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:24px;cursor:pointer;display:block;}
+.lead .cat-tag{color:var(--maroon);font-weight:700;font-size:.85rem;}
+.lead h2{font-size:clamp(1.5rem,3.4vw,2.2rem);margin:8px 0 10px;line-height:1.3;}
+.lead:hover h2{text-decoration:underline;text-decoration-color:var(--gold);}
+.lead p{color:#3d3a34;font-size:1.02rem;}
+.lead .meta{color:var(--mute);font-size:.85rem;margin-top:8px;}
+
+/* Article grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 26px;}
+@media (max-width:560px){.grid{grid-template-columns:1fr;}}
+.card{border-top:1px solid var(--line);padding-top:14px;cursor:pointer;display:block;}
+.card .cat-tag{color:var(--maroon);font-weight:700;font-size:.78rem;}
+.card h3{font-size:1.12rem;margin:6px 0 8px;line-height:1.35;}
+.card:hover h3{text-decoration:underline;text-decoration-color:var(--gold);}
+.card p{color:#4a463f;font-size:.92rem;margin:0;}
+.card .meta{color:var(--mute);font-size:.8rem;margin-top:8px;}
+
+/* Section heading */
+.section-head{display:flex;align-items:baseline;gap:12px;margin:34px 0 16px;border-bottom:2px solid var(--ink);padding-bottom:8px;}
+.section-head h2{font-size:1.3rem;}
+
+/* Sidebar */
+.sidebar{border-left:1px solid var(--line);padding-left:26px;}
+@media (max-width:860px){.sidebar{border-left:none;padding-left:0;border-top:2px solid var(--ink);padding-top:20px;}}
+.sidebar h4{font-size:1.05rem;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px;}
+.side-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line);cursor:pointer;}
+.side-item .num{font-family:'Noto Serif Bengali',serif;font-weight:800;color:var(--gold);font-size:1.4rem;line-height:1;}
+.side-item h5{font-size:.98rem;line-height:1.35;font-weight:600;font-family:'Hind Siliguri',sans-serif;}
+.side-item:hover h5{text-decoration:underline;text-decoration-color:var(--gold);}
+
+/* Footer */
+footer{background:var(--ink);color:#c9c4b8;padding:30px 0;margin-top:20px;}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.88rem;}
+footer a{color:var(--gold);}
+
+/* ===== Article detail overlay ===== */
+.overlay{position:fixed;inset:0;background:rgba(20,18,15,.55);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;z-index:100;}
+.overlay.open{display:flex;}
+.article-panel{background:var(--paper);max-width:760px;width:100%;padding:36px clamp(20px,4vw,52px) 50px;position:relative;margin-top:20px;}
+.article-panel .close-btn{position:absolute;top:16px;right:16px;background:var(--ink);color:var(--paper);border:none;width:34px;height:34px;font-size:1.1rem;cursor:pointer;}
+.article-panel .cat-tag{color:var(--maroon);font-weight:700;font-size:.85rem;}
+.article-panel h2{font-size:clamp(1.5rem,4vw,2.1rem);margin:10px 0 12px;line-height:1.35;}
+.article-panel .meta{color:var(--mute);font-size:.87rem;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+.article-panel .body-text p{margin:0 0 16px;font-size:1.05rem;color:#2c2a25;}
+
+/* empty state */
+.empty{padding:40px 0;color:var(--mute);text-align:center;}
