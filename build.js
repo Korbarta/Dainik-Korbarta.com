@@ -9,8 +9,7 @@ const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ার
 const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
 
 // কাঙ্ক্ষিত ক্যাটাগরি ক্রম
-const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
-
+const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
 }
@@ -113,13 +112,16 @@ function searchBox(){
 }
 
 function siteHeader(){
+ function siteHeader(){
   return `<header class="masthead">
-    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:20px;">
-      <a href="/" style="display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;">
-        <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;">
-        <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
+    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:20px;">
+      <a href="/" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;">
+        <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
+        <div style="text-align:left;">
+          <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
+          <p class="tagline" style="margin:2px 0 0;">${escapeHtml(SITE_TAGLINE)}</p>
+        </div>
       </a>
-      <p class="tagline" style="margin:0;">${escapeHtml(SITE_TAGLINE)}</p>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
         <p style="margin:0;font-size:12px;color:#888;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
         ${searchBox()}
