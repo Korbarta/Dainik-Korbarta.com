@@ -1,15 +1,8 @@
 // build.js — দৈনিক করবার্তা SEO builder
-// প্রতিবার কনটেন্ট পরিবর্তন হলে (এডমিন প্যানেল থেকে বা ম্যানুয়ালি) এই স্ক্রিপ্ট চালালে
-// প্রতিটা সংবাদের জন্য আলাদা static HTML পেজ, হোমপেজ, sitemap.xml ও robots.txt তৈরি হয়।
-//
-// লোকাল/ম্যানুয়াল রান: node build.js
-// Netlify-তে (GitHub দিয়ে ডিপ্লয় করলে) এটা build command হিসেবে netlify.toml-এ সেট করা আছে,
-// তাই এডমিন প্যানেল থেকে সেভ করলেই স্বয়ংক্রিয়ভাবে চলবে।
-
 const fs = require('fs');
 const path = require('path');
 
-const SITE_URL = 'https://dainikkorbarta.com'; // ✅ ঠিক করা হয়েছে
+const SITE_URL = 'https://dainikkorbarta.com';
 
 const BN_WEEKDAYS = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
 const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
@@ -29,7 +22,6 @@ function escapeHtml(str){
 function bodyToHtml(body){
   return (body || '').split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('\n');
 }
-// একই স্লাগ-তৈরির নিয়ম script.js-এও আছে, দুটো মিলিয়ে রাখতে হবে
 function slugify(title, index){
   const base = String(title)
     .trim()
@@ -44,7 +36,6 @@ const articlesData = readJson('content/articles.json');
 const settings = readJson('content/settings.json');
 const articles = articlesData.articles || [];
 
-// পুরোনো জেনারেটেড ফোল্ডার সাফ করা
 if (fs.existsSync('article')) fs.rmSync('article', { recursive: true, force: true });
 fs.mkdirSync('article');
 
@@ -81,10 +72,13 @@ function siteHeader(){
   </header>`;
 }
 
+const COUNTER_HTML = "<div style=\"margin-top:16px;text-align:center;\"><a href='https://www.free-counters.org/' style=\"font-size:11px;color:#999;\">powered by Free-Counters.org</a><script type='text/javascript' src='https://www.freevisitorcounters.com/auth.php?id=85ca76eaf26803643e138c9916d5d3fa90ec211a'></script><script type=\"text/javascript\" src=\"https://www.freevisitorcounters.com/en/home/counter/1642761/t/6\"></script></div>";
+
 function siteFooter(){
   return `<footer>
     <div class="wrap">
       <span>© ${toBnNumber(new Date().getFullYear())} <a href="/">হোমপেজ</a> ${escapeHtml(SITE_TITLE)}</span>
+      ${COUNTER_HTML}
     </div>
   </footer>`;
 }
@@ -110,20 +104,11 @@ function articlePageHtml(a, slug){
     <div class="meta">${formatDateBn(d)}</div>
     <div class="body-text" style="margin-top:20px;">${bodyToHtml(a.body)}</div>
   </main>
- function siteFooter(){
-  return `<footer>
-    <div class="wrap">
-      <span>© ${toBnNumber(new Date().getFullYear())} <a href="/">হোমপেজ</a> ${escapeHtml(SITE_TITLE)}</span>
-      <div style="margin-top:16px;text-align:center;">
-        <a href='https://www.free-counters.org/' style="font-size:11px;color:#999;">powered by Free-Counters.org</a>
-        <script type='text/javascript' src='https://www.freevisitorcounters.com/auth.php?id=85ca76eaf26803643e138c9916d5d3fa90ec211a'></script>
-        <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1642761/t/6"></script>
-      </div>
-    </div>
-  </footer>`;
+  ${siteFooter()}
+</body>
+</html>`;
 }
 
-// আর্টিকেল পেজ তৈরি
 const slugMap = [];
 const sortedArticles = [...articles].sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -139,7 +124,6 @@ articles.forEach((a, i) => {
 fs.mkdirSync('content', { recursive: true });
 fs.writeFileSync('content/article-slugs.json', JSON.stringify(slugMap, null, 2));
 
-// ✅ হোমপেজ (index.html) তৈরি — সব আর্টিকেলের লিস্ট দেখাবে
 function homePageHtml(){
   const title = `${escapeHtml(SITE_TITLE)}${SITE_TAGLINE ? ' — ' + escapeHtml(SITE_TAGLINE) : ''}`;
   const desc = escapeHtml(SITE_TAGLINE || 'বাংলাদেশের সর্বশেষ সংবাদ');
@@ -175,7 +159,6 @@ function homePageHtml(){
 
 fs.writeFileSync('index.html', homePageHtml());
 
-// sitemap.xml
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url><loc>${u}</loc></url>`).join('\n')}
@@ -183,7 +166,6 @@ ${urls.map(u => `  <url><loc>${u}</loc></url>`).join('\n')}
 `;
 fs.writeFileSync('sitemap.xml', sitemap);
 
-// robots.txt
 fs.writeFileSync('robots.txt', `User-agent: *
 Allow: /
 Disallow: /admin/
