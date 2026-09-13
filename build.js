@@ -110,9 +110,17 @@ function articlePageHtml(a, slug){
     <div class="meta">${formatDateBn(d)}</div>
     <div class="body-text" style="margin-top:20px;">${bodyToHtml(a.body)}</div>
   </main>
-  ${siteFooter()}
-</body>
-</html>`;
+ function siteFooter(){
+  return `<footer>
+    <div class="wrap">
+      <span>© ${toBnNumber(new Date().getFullYear())} <a href="/">হোমপেজ</a> ${escapeHtml(SITE_TITLE)}</span>
+      <div style="margin-top:16px;text-align:center;">
+        <a href='https://www.free-counters.org/' style="font-size:11px;color:#999;">powered by Free-Counters.org</a>
+        <script type='text/javascript' src='https://www.freevisitorcounters.com/auth.php?id=85ca76eaf26803643e138c9916d5d3fa90ec211a'></script>
+        <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1642761/t/6"></script>
+      </div>
+    </div>
+  </footer>`;
 }
 
 // আর্টিকেল পেজ তৈরি
