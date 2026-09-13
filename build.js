@@ -14,6 +14,13 @@ function toBnNumber(n){
 function formatDateBn(d){
   return `${BN_WEEKDAYS[d.getDay()]}, ${toBnNumber(d.getDate())} ${BN_MONTHS[d.getMonth()]} ${toBnNumber(d.getFullYear())}`;
 }
+function formatDateTimeBn(d){
+  let h = d.getHours();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if (h === 0) h = 12;
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${formatDateBn(d)}, ${toBnNumber(h)}:${toBnNumber(mm)} ${ampm}`;
+}
 function escapeHtml(str){
   return String(str || '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -47,8 +54,8 @@ const urls = [`${SITE_URL}/`];
 
 const SITE_TITLE = settings.site_title || 'দৈনিক করবার্তা';
 const SITE_TAGLINE = settings.tagline || '';
+const BUILD_TIME = new Date();
 
-// ইউনিক ক্যাটাগরি লিস্ট বের করা (আর্টিকেল যেসব ক্যাটাগরিতে আছে)
 const categories = [...new Set(articles.map(a => a.category).filter(Boolean))];
 
 function pageHead(title, desc, canonical, ogImage){
@@ -62,7 +69,11 @@ function pageHead(title, desc, canonical, ogImage){
   <meta property="og:description" content="${escapeHtml(desc)}">
   <meta property="og:url" content="${canonical}">
   ${ogImage ? `<meta property="og:image" content="${escapeHtml(ogImage)}">` : ''}
-  <link rel="stylesheet" href="/style.css">`;
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    .breaking-track { display:inline-block; white-space:nowrap; animation: marquee 25s linear infinite; }
+  </style>`;
 }
 
 function categoryNav(){
@@ -74,18 +85,29 @@ function categoryNav(){
   </nav>`;
 }
 
+function breakingNewsBar(){
+  const latest3 = sortedArticles.slice(0, 3).map(a => escapeHtml(a.title));
+  const text = latest3.join('   ●   ');
+  return `<div style="background:#c0392b;color:#fff;display:flex;align-items:center;overflow:hidden;">
+    <span style="background:#8e2b1f;padding:8px 14px;font-weight:bold;font-size:13px;flex-shrink:0;white-space:nowrap;">ব্রেকিং নিউজ</span>
+    <div style="overflow:hidden;flex:1;">
+      <div class="breaking-track" style="padding:8px 0;font-size:13px;">${text || 'কোনো সংবাদ নেই'}</div>
+    </div>
+  </div>`;
+}
+
 function siteHeader(){
   return `<header class="masthead">
-    <div class="wrap" style="display:flex;align-items:center;gap:14px;padding:16px 20px;">
-      <a href="/" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;">
-        <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:56px;width:56px;border-radius:50%;flex-shrink:0;">
-        <div>
-          <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
-          <p class="tagline" style="margin:2px 0 0;">${escapeHtml(SITE_TAGLINE)}</p>
-        </div>
+    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:20px;">
+      <a href="/" style="display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;">
+        <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;">
+        <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
       </a>
+      <p class="tagline" style="margin:0;">${escapeHtml(SITE_TAGLINE)}</p>
+      <p style="margin:0;font-size:12px;color:#888;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
     </div>
   </header>
+  ${breakingNewsBar()}
   ${categoryNav()}`;
 }
 
@@ -100,7 +122,6 @@ function siteFooter(){
   </footer>`;
 }
 
-// প্রতিটা আর্টিকেলের slug আগে থেকে হিসেব করে রাখা
 const sortedArticles = [...articles].sort((a, b) => new Date(b.date) - new Date(a.date));
 const slugMap = [];
 articles.forEach((a, i) => { slugMap.push({ index: i, slug: slugify(a.title, i) }); });
@@ -146,7 +167,6 @@ articles.forEach((a) => {
 fs.mkdirSync('content', { recursive: true });
 fs.writeFileSync('content/article-slugs.json', JSON.stringify(slugMap, null, 2));
 
-// একটা আর্টিকেলের ছোট কার্ড
 function articleCard(a, big){
   const slug = slugOf(a);
   const d = new Date(a.date);
@@ -186,7 +206,6 @@ function homePageHtml(){
 
   const hero = sortedArticles[0];
   const rest = sortedArticles.slice(1);
-
   const gridCards = rest.map(a => `<div>${articleCard(a, false)}</div>`).join('');
 
   return `<!DOCTYPE html>
@@ -210,7 +229,6 @@ function homePageHtml(){
 
 fs.writeFileSync('index.html', homePageHtml());
 
-// ক্যাটাগরি পেজ
 categories.forEach(cat => {
   const catArticles = sortedArticles.filter(a => a.category === cat);
   const slug = catSlugify(cat);
@@ -251,4 +269,4 @@ Disallow: /admin/
 Sitemap: ${SITE_URL}/sitemap.xml
 `);
 
-console.log(`✓ Build সম্পূর্ণ – ${articles.length}টি আর্টিকেল, ${categories.length}টি ক্যাটাগরি পেজ, হোমপেজ, sitemap.xml ও robots.txt তৈরি হয়েছে`);
+console.log(`✓ Build সম্পূর্ণ – ${articles.length}টি আর্টিকেল, ${categories.length}টি ক্যাটাগরি পেজ তৈরি হয়েছে`);
