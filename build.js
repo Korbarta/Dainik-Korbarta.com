@@ -69,9 +69,14 @@ function pageHead(title, desc, canonical, ogImage){
 
 function siteHeader(){
   return `<header class="masthead">
-    <div class="wrap">
-      <a href="/"><h1>${escapeHtml(SITE_TITLE)}</h1></a>
-      <p class="tagline">${escapeHtml(SITE_TAGLINE)}</p>
+    <div class="wrap" style="display:flex;align-items:center;gap:14px;">
+      <a href="/" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;">
+        <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:56px;width:56px;border-radius:50%;flex-shrink:0;">
+        <div>
+          <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
+          <p class="tagline" style="margin:2px 0 0;">${escapeHtml(SITE_TAGLINE)}</p>
+        </div>
+      </a>
     </div>
   </header>`;
 }
