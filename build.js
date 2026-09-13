@@ -8,8 +8,8 @@ const BN_WEEKDAYS = ['রবিবার','সোমবার','মঙ্গল�
 const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
 const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
 
-// কাঙ্ক্ষিত ক্যাটাগরি ক্রম
 const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
+
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
 }
@@ -58,7 +58,6 @@ const SITE_TITLE = settings.site_title || 'দৈনিক করবার্ত
 const SITE_TAGLINE = settings.tagline || '';
 const BUILD_TIME = new Date();
 
-// আর্টিকেলে থাকা ইউনিক ক্যাটাগরি বের করা, তারপর কাঙ্ক্ষিত ক্রমে সাজানো
 const foundCategories = [...new Set(articles.map(a => a.category).filter(Boolean))];
 const categories = [
   ...CATEGORY_ORDER.filter(c => foundCategories.includes(c)),
@@ -112,7 +111,6 @@ function searchBox(){
 }
 
 function siteHeader(){
- function siteHeader(){
   return `<header class="masthead">
     <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:20px;">
       <a href="/" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;">
