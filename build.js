@@ -8,6 +8,9 @@ const BN_WEEKDAYS = ['রবিবার','সোমবার','মঙ্গল�
 const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
 const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
 
+// কাঙ্ক্ষিত ক্যাটাগরি ক্রম
+const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
+
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
 }
@@ -56,7 +59,12 @@ const SITE_TITLE = settings.site_title || 'দৈনিক করবার্ত
 const SITE_TAGLINE = settings.tagline || '';
 const BUILD_TIME = new Date();
 
-const categories = [...new Set(articles.map(a => a.category).filter(Boolean))];
+// আর্টিকেলে থাকা ইউনিক ক্যাটাগরি বের করা, তারপর কাঙ্ক্ষিত ক্রমে সাজানো
+const foundCategories = [...new Set(articles.map(a => a.category).filter(Boolean))];
+const categories = [
+  ...CATEGORY_ORDER.filter(c => foundCategories.includes(c)),
+  ...foundCategories.filter(c => !CATEGORY_ORDER.includes(c))
+];
 
 function pageHead(title, desc, canonical, ogImage){
   return `<meta charset="UTF-8">
@@ -81,19 +89,27 @@ function categoryNav(){
     `<a href="/category/${catSlugify(c)}/" style="padding:8px 14px;text-decoration:none;color:#222;font-size:14px;white-space:nowrap;">${escapeHtml(c)}</a>`
   ).join('');
   return `<nav style="border-top:1px solid #eee;border-bottom:1px solid #eee;overflow-x:auto;white-space:nowrap;background:#fafafa;">
-    <a href="/" style="padding:8px 14px;text-decoration:none;color:#c0392b;font-weight:bold;font-size:14px;">প্রচ্ছদ</a>${links}
+    <a href="/" style="padding:8px 14px;text-decoration:none;color:#1a5276;font-weight:bold;font-size:14px;">প্রচ্ছদ</a>${links}
   </nav>`;
 }
 
 function breakingNewsBar(){
   const latest3 = sortedArticles.slice(0, 3).map(a => escapeHtml(a.title));
   const text = latest3.join('   ●   ');
-  return `<div style="background:#c0392b;color:#fff;display:flex;align-items:center;overflow:hidden;">
-    <span style="background:#8e2b1f;padding:8px 14px;font-weight:bold;font-size:13px;flex-shrink:0;white-space:nowrap;">ব্রেকিং নিউজ</span>
+  return `<div style="background:#1a5276;color:#fff;display:flex;align-items:center;overflow:hidden;">
+    <span style="background:#123a58;padding:8px 14px;font-weight:bold;font-size:13px;flex-shrink:0;white-space:nowrap;">ব্রেকিং নিউজ</span>
     <div style="overflow:hidden;flex:1;">
       <div class="breaking-track" style="padding:8px 0;font-size:13px;">${text || 'কোনো সংবাদ নেই'}</div>
     </div>
   </div>`;
+}
+
+function searchBox(){
+  return `<form action="https://www.google.com/search" method="get" target="_blank" style="display:flex;gap:0;">
+    <input type="hidden" name="as_sitesearch" value="dainikkorbarta.com">
+    <input type="text" name="q" placeholder="অনুসন্ধান করুন..." style="padding:6px 10px;border:1px solid #ccc;border-radius:4px 0 0 4px;font-size:13px;width:160px;">
+    <button type="submit" style="padding:6px 12px;border:1px solid #1a5276;background:#1a5276;color:#fff;border-radius:0 4px 4px 0;cursor:pointer;font-size:13px;">খুঁজুন</button>
+  </form>`;
 }
 
 function siteHeader(){
@@ -104,7 +120,10 @@ function siteHeader(){
         <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
       </a>
       <p class="tagline" style="margin:0;">${escapeHtml(SITE_TAGLINE)}</p>
-      <p style="margin:0;font-size:12px;color:#888;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
+        <p style="margin:0;font-size:12px;color:#888;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
+        ${searchBox()}
+      </div>
     </div>
   </header>
   ${breakingNewsBar()}
@@ -194,7 +213,7 @@ function latestSidebar(list){
     return `<a href="/article/${slug}/" style="display:block;text-decoration:none;color:#222;padding:10px 0;border-bottom:1px solid #eee;font-size:14px;line-height:1.5;">${escapeHtml(a.title)}</a>`;
   }).join('');
   return `<aside style="background:#fafafa;border-radius:8px;padding:16px;">
-    <h3 style="margin:0 0 10px;font-size:1.1rem;border-bottom:2px solid #c0392b;padding-bottom:8px;">সর্বশেষ</h3>
+    <h3 style="margin:0 0 10px;font-size:1.1rem;border-bottom:2px solid #1a5276;padding-bottom:8px;">সর্বশেষ</h3>
     ${items || '<p>কোনো সংবাদ নেই।</p>'}
   </aside>`;
 }
@@ -244,7 +263,7 @@ categories.forEach(cat => {
 <body>
   ${siteHeader()}
   <main class="wrap" style="max-width:760px;padding:24px 20px 60px;">
-    <h2 style="border-bottom:2px solid #c0392b;padding-bottom:10px;">${escapeHtml(cat)}</h2>
+    <h2 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">${escapeHtml(cat)}</h2>
     ${items || '<p>এই বিভাগে এখনো কোনো সংবাদ নেই।</p>'}
   </main>
   ${siteFooter()}
