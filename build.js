@@ -7,8 +7,13 @@ const SITE_URL = 'https://dainikkorbarta.com';
 const BN_WEEKDAYS = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
 const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
 const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const HIJRI_MONTHS_BN = ['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
 
 const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
+
+// নেভিগেশন বারে সবসময় দেখাতে চাওয়া নির্দিষ্ট ক্যাটাগরি (আর্টিকেল না থাকলেও পেজ তৈরি হবে)
+const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','খেলাধূলা','স্বাস্থ্য','পাঠক সংবাদ'];
 
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
@@ -22,6 +27,32 @@ function formatDateTimeBn(d){
   h = h % 12; if (h === 0) h = 12;
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${formatDateBn(d)}, ${toBnNumber(h)}:${toBnNumber(mm)} ${ampm}`;
+}
+function formatDateEn(d){
+  return `${d.getDate()} ${EN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+// গ্রেগরিয়ান থেকে হিজরি রূপান্তর (Kuwaiti algorithm — মোটামুটি নির্ভুল, চাঁদ দেখার সাথে ১ দিন এদিক-ওদিক হতে পারে)
+function gregorianToHijri(date){
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  let jd = Math.floor((1461 * (year + 4800 + Math.floor((month - 14) / 12))) / 4) +
+    Math.floor((367 * (month - 2 - 12 * Math.floor((month - 14) / 12))) / 12) -
+    Math.floor((3 * Math.floor((year + 4900 + Math.floor((month - 14) / 12)) / 100)) / 4) +
+    day - 32075;
+  let l = jd - 1948440 + 10632;
+  const n = Math.floor((l - 1) / 10631);
+  l = l - 10631 * n + 354;
+  const j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) + Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
+  l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+  const hMonth = Math.floor((24 * l) / 709);
+  const hDay = l - Math.floor((709 * hMonth) / 24);
+  const hYear = 30 * n + j - 30;
+  return { day: hDay, month: hMonth, year: hYear };
+}
+function formatHijriBn(date){
+  const h = gregorianToHijri(date);
+  return `${toBnNumber(h.day)} ${HIJRI_MONTHS_BN[h.month - 1]} ${toBnNumber(h.year)} হিজরি`;
 }
 function escapeHtml(str){
   return String(str || '')
@@ -64,6 +95,11 @@ const categories = [
   ...foundCategories.filter(c => !CATEGORY_ORDER.includes(c))
 ];
 
+// ফিক্সড এক্সট্রা ক্যাটাগরি যোগ করা হচ্ছে (ডুপ্লিকেট এড়িয়ে)
+NAV_EXTRA_CATEGORIES.forEach(c => {
+  if (!categories.includes(c)) categories.push(c);
+});
+
 function pageHead(title, desc, canonical, ogImage){
   return `<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -87,7 +123,7 @@ function categoryNav(){
     `<a href="/category/${catSlugify(c)}/" style="padding:8px 14px;text-decoration:none;color:#222;font-size:14px;white-space:nowrap;">${escapeHtml(c)}</a>`
   ).join('');
   return `<nav style="border-top:1px solid #eee;border-bottom:1px solid #eee;overflow-x:auto;white-space:nowrap;background:#fafafa;">
-    <a href="/" style="padding:8px 14px;text-decoration:none;color:#1a5276;font-weight:bold;font-size:14px;">প্রচ্ছদ</a>${links}
+    <a href="/" style="padding:8px 14px;text-decoration:none;color:#1a5276;font-weight:bold;font-size:14px;">প্রচ্ছদ</a><a href="/" style="padding:8px 14px;text-decoration:none;color:#222;font-size:14px;white-space:nowrap;">সর্বশেষ</a>${links}
   </nav>`;
 }
 
@@ -110,14 +146,24 @@ function searchBox(){
   </form>`;
 }
 
+function topBar(){
+  return `<div style="background:#f5f5f5;border-bottom:1px solid #eee;">
+    <div class="wrap" style="display:flex;justify-content:flex-end;padding:6px 20px;">
+      <a href="/epaper/" style="font-size:13px;color:#1a5276;text-decoration:none;font-weight:bold;">📰 ই-পেপার</a>
+    </div>
+  </div>`;
+}
+
 function siteHeader(){
-  return `<header class="masthead">
+  return `${topBar()}
+  <header class="masthead">
     <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:20px;">
       <a href="/" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;">
         <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
         <div style="text-align:left;">
           <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
           <p class="tagline" style="margin:2px 0 0;">${escapeHtml(SITE_TAGLINE)}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#888;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
         </div>
       </a>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
@@ -136,6 +182,12 @@ function siteFooter(){
   return `<footer>
     <div class="wrap">
       <span>© ${toBnNumber(new Date().getFullYear())} <a href="/">হোমপেজ</a> ${escapeHtml(SITE_TITLE)}</span>
+      <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;">
+        <a href="/about-us/">আমাদের সম্পর্কে</a>
+        <a href="/contact-us/">যোগাযোগ</a>
+        <a href="/privacy-policy/">গোপনীয়তা নীতি</a>
+        <a href="/terms-and-conditions/">শর্তাবলী</a>
+      </div>
       ${COUNTER_HTML}
     </div>
   </footer>`;
@@ -274,6 +326,102 @@ categories.forEach(cat => {
   fs.writeFileSync(path.join(dir, 'index.html'), html);
   urls.push(canonical);
 });
+
+// ===== স্ট্যাটিক পেজ (ফুটারে লিংক) =====
+function staticPageHtml(title, desc, bodyHtml, canonical){
+  return `<!DOCTYPE html>
+<html lang="bn">
+<head>
+  ${pageHead(title, desc, canonical, null)}
+</head>
+<body>
+  ${siteHeader()}
+  <main class="wrap" style="max-width:760px;padding:36px 20px 60px;">
+    ${bodyHtml}
+  </main>
+  ${siteFooter()}
+</body>
+</html>`;
+}
+
+const staticPages = [
+  {
+    slug: 'about-us',
+    title: `আমাদের সম্পর্কে - ${SITE_TITLE}`,
+    desc: `${SITE_TITLE} সম্পর্কে জানুন`,
+    body: `
+      <h1 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">আমাদের সম্পর্কে</h1>
+      <div class="body-text" style="margin-top:16px;">
+        <p>${escapeHtml(SITE_TITLE)} একটি বাংলা অনলাইন সংবাদমাধ্যম, যার লক্ষ্য পাঠকদের কাছে সঠিক, নির্ভরযোগ্য ও সময়োপযোগী সংবাদ পৌঁছে দেওয়া।</p>
+        <p>আমরা জাতীয়, আন্তর্জাতিক, রাজনীতি, অর্থনীতি, খেলাধূলা, বিনোদন, বিজ্ঞান ও প্রযুক্তি এবং স্বাস্থ্য বিষয়ক সংবাদ নিয়মিত প্রকাশ করে থাকি।</p>
+        <p>আপনার যেকোনো মতামত, পরামর্শ বা সংবাদ পাঠাতে আমাদের সাথে যোগাযোগ পাতার মাধ্যমে যোগাযোগ করতে পারেন।</p>
+      </div>`
+  },
+  {
+    slug: 'contact-us',
+    title: `যোগাযোগ - ${SITE_TITLE}`,
+    desc: `${SITE_TITLE}-এর সাথে যোগাযোগ করুন`,
+    body: `
+      <h1 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">যোগাযোগ</h1>
+      <div class="body-text" style="margin-top:16px;">
+        <p><strong>মোঃ আমিনুল ইসলাম</strong><br>সম্পাদক</p>
+        <p>মোবাইল নম্বর: ০১৮৬০৩১৭৭৮৮</p>
+        <p>ইমেইল: <a href="mailto:dainikkorbarta@gmail.com">dainikkorbarta@gmail.com</a></p>
+      </div>`
+  },
+  {
+    slug: 'privacy-policy',
+    title: `গোপনীয়তা নীতি - ${SITE_TITLE}`,
+    desc: `${SITE_TITLE}-এর গোপনীয়তা নীতি`,
+    body: `
+      <h1 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">গোপনীয়তা নীতি</h1>
+      <div class="body-text" style="margin-top:16px;">
+        <p>${escapeHtml(SITE_TITLE)} পাঠকদের ব্যক্তিগত তথ্যের গোপনীয়তাকে গুরুত্ব সহকারে বিবেচনা করে। এই ওয়েবসাইট ব্যবহারের মাধ্যমে আপনি নিচের নীতিতে সম্মত হচ্ছেন বলে গণ্য হবে।</p>
+        <p><strong>তথ্য সংগ্রহ:</strong> আমরা সাধারণত ভিজিটরদের ব্যক্তিগত তথ্য সংগ্রহ করি না, তবে ভিজিটর কাউন্টার ও অ্যানালিটিক্স টুলের মাধ্যমে সাধারণ ব্যবহার পরিসংখ্যান (ব্রাউজার, ভিজিটের সময়, পৃষ্ঠা ভিউ ইত্যাদি) সংগ্রহ হতে পারে।</p>
+        <p><strong>কুকিজ:</strong> ওয়েবসাইটের কার্যকারিতা উন্নত করতে কুকিজ ব্যবহার করা হতে পারে।</p>
+        <p><strong>তৃতীয় পক্ষ:</strong> আমাদের সাইটে ব্যবহৃত কোনো তৃতীয় পক্ষের বিজ্ঞাপন বা সেবার গোপনীয়তা নীতি তাদের নিজস্ব নিয়ম অনুযায়ী পরিচালিত হয়।</p>
+        <p>এই নীতিতে যেকোনো পরিবর্তন এই পাতায় প্রকাশ করা হবে।</p>
+      </div>`
+  },
+  {
+    slug: 'terms-and-conditions',
+    title: `শর্তাবলী - ${SITE_TITLE}`,
+    desc: `${SITE_TITLE}-এর ব্যবহারের শর্তাবলী`,
+    body: `
+      <h1 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">শর্তাবলী</h1>
+      <div class="body-text" style="margin-top:16px;">
+        <p>এই ওয়েবসাইট ব্যবহারের মাধ্যমে আপনি নিম্নলিখিত শর্তাবলীতে সম্মত হচ্ছেন।</p>
+        <p><strong>কনটেন্ট ব্যবহার:</strong> এই সাইটের সংবাদ ও লেখা শুধুমাত্র ব্যক্তিগত ব্যবহারের জন্য। লিখিত অনুমতি ছাড়া কোনো কনটেন্ট পুনঃপ্রকাশ বা বাণিজ্যিকভাবে ব্যবহার করা যাবে না।</p>
+        <p><strong>নির্ভুলতা:</strong> আমরা সঠিক তথ্য দেওয়ার চেষ্টা করি, তবে কোনো তথ্যগত ভুলের জন্য দায়ী থাকা হবে না।</p>
+        <p><strong>পরিবর্তন:</strong> কর্তৃপক্ষ যেকোনো সময় এই শর্তাবলী পরিবর্তনের অধিকার রাখে।</p>
+      </div>`
+  }
+];
+
+staticPages.forEach(p => {
+  const canonical = `${SITE_URL}/${p.slug}/`;
+  const dir = path.join(p.slug);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'index.html'), staticPageHtml(p.title, p.desc, p.body, canonical));
+  urls.push(canonical);
+});
+
+// ===== ই-পেপার (আপাতত প্লেসহোল্ডার, পরে পিডিএফ/ছবি যোগ করা যাবে) =====
+{
+  const canonical = `${SITE_URL}/epaper/`;
+  const html = staticPageHtml(
+    `ই-পেপার - ${SITE_TITLE}`,
+    `${SITE_TITLE}-এর ই-পেপার সংস্করণ`,
+    `<h1 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">ই-পেপার</h1>
+     <div class="body-text" style="margin-top:16px;">
+       <p>আজকের ই-পেপার সংস্করণ শীঘ্রই প্রকাশিত হবে।</p>
+     </div>`,
+    canonical
+  );
+  fs.mkdirSync('epaper', { recursive: true });
+  fs.writeFileSync(path.join('epaper', 'index.html'), html);
+  urls.push(canonical);
+}
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
