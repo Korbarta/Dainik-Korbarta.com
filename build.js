@@ -115,7 +115,15 @@ function pageHead(title, desc, canonical, ogImage){
   <style>
     @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     .breaking-track { display:inline-block; white-space:nowrap; animation: marquee 25s linear infinite; }
-  </style>`;
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RDPGCW8RSL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RDPGCW8RSL');
+  </script>`;
 }
 
 function categoryNav(){
