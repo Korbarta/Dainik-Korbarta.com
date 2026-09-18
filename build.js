@@ -13,7 +13,7 @@ const HIJRI_MONTHS_BN = ['মহররম','সফর','রবিউল আউ�
 const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
 
 // নেভিগেশন বারে সবসময় দেখাতে চাওয়া নির্দিষ্ট ক্যাটাগরি (আর্টিকেল না থাকলেও পেজ তৈরি হবে)
-const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','খেলাধূলা','স্বাস্থ্য','পাঠক সংবাদ'];
+const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','স্বাস্থ্য','পাঠক সংবাদ'];
 
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
@@ -171,7 +171,39 @@ function siteHeader(){
         <div style="text-align:left;">
           <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
           <p class="tagline" style="margin:2px 0 0;">${escapeHtml(SITE_TAGLINE)}</p>
-          <p style="margin:4px 0 0;font-size:11px;color:#888;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
+          <p id="today-date" style="margin:4px 0 0;font-size:11px;color:#888;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
+          <script>
+          (function(){
+            var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+            var bnWeekdays=['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+            var bnMonths=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+            var enMonths=['January','February','March','April','May','June','July','August','September','October','November','December'];
+            var hijriMonths=['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
+            function toBn(n){ return String(n).split('').map(function(ch){ return /\d/.test(ch)?bnDigits[ch]:ch; }).join(''); }
+            function bnDate(d){ return bnWeekdays[d.getDay()]+', '+toBn(d.getDate())+' '+bnMonths[d.getMonth()]+' '+toBn(d.getFullYear()); }
+            function enDate(d){ return d.getDate()+' '+enMonths[d.getMonth()]+' '+d.getFullYear(); }
+            function toHijri(date){
+              var day=date.getDate(), month=date.getMonth()+1, year=date.getFullYear();
+              var jd=Math.floor((1461*(year+4800+Math.floor((month-14)/12)))/4)+Math.floor((367*(month-2-12*Math.floor((month-14)/12)))/12)-Math.floor((3*Math.floor((year+4900+Math.floor((month-14)/12))/100))/4)+day-32075;
+              var l=jd-1948440+10632;
+              var n=Math.floor((l-1)/10631);
+              l=l-10631*n+354;
+              var j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);
+              l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;
+              var hMonth=Math.floor((24*l)/709);
+              var hDay=l-Math.floor((709*hMonth)/24);
+              var hYear=30*n+j-30;
+              return {day:hDay,month:hMonth,year:hYear};
+            }
+            function hijriDate(d){
+              var h=toHijri(d);
+              return toBn(h.day)+' '+hijriMonths[h.month-1]+' '+toBn(h.year)+' হিজরি';
+            }
+            var now=new Date();
+            var el=document.getElementById('today-date');
+            if(el) el.textContent = enDate(now)+' | '+bnDate(now)+' | '+hijriDate(now);
+          })();
+          </script>
         </div>
       </a>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
