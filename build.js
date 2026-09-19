@@ -12,7 +12,6 @@ const HIJRI_MONTHS_BN = ['মহররম','সফর','রবিউল আউ�
 
 const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
 
-// নেভিগেশন বারে সবসময় দেখাতে চাওয়া নির্দিষ্ট ক্যাটাগরি (আর্টিকেল না থাকলেও পেজ তৈরি হবে)
 const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','স্বাস্থ্য','পাঠক সংবাদ'];
 
 function toBnNumber(n){
@@ -31,7 +30,6 @@ function formatDateTimeBn(d){
 function formatDateEn(d){
   return `${d.getDate()} ${EN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
-// গ্রেগরিয়ান থেকে হিজরি রূপান্তর (Kuwaiti algorithm — মোটামুটি নির্ভুল, চাঁদ দেখার সাথে ১ দিন এদিক-ওদিক হতে পারে)
 function gregorianToHijri(date){
   const day = date.getDate();
   const month = date.getMonth() + 1;
@@ -95,7 +93,6 @@ const categories = [
   ...foundCategories.filter(c => !CATEGORY_ORDER.includes(c))
 ];
 
-// ফিক্সড এক্সট্রা ক্যাটাগরি যোগ করা হচ্ছে (ডুপ্লিকেট এড়িয়ে)
 NAV_EXTRA_CATEGORIES.forEach(c => {
   if (!categories.includes(c)) categories.push(c);
 });
@@ -165,46 +162,46 @@ function topBar(){
 function siteHeader(){
   return `${topBar()}
   <header class="masthead">
-    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:20px;">
-      <a href="/" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;">
-        <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
-        <div style="text-align:left;">
-          <h1 style="margin:0;">${escapeHtml(SITE_TITLE)}</h1>
-          <p class="tagline" style="margin:2px 0 0;">${escapeHtml(SITE_TAGLINE)}</p>
-          <p id="today-date" style="margin:4px 0 0;font-size:11px;color:#888;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
-          <script>
-          (function(){
-            var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-            var bnWeekdays=['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
-            var bnMonths=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
-            var enMonths=['January','February','March','April','May','June','July','August','September','October','November','December'];
-            var hijriMonths=['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
-            function toBn(n){ return String(n).split('').map(function(ch){ return /\d/.test(ch)?bnDigits[ch]:ch; }).join(''); }
-            function bnDate(d){ return bnWeekdays[d.getDay()]+', '+toBn(d.getDate())+' '+bnMonths[d.getMonth()]+' '+toBn(d.getFullYear()); }
-            function enDate(d){ return d.getDate()+' '+enMonths[d.getMonth()]+' '+d.getFullYear(); }
-            function toHijri(date){
-              var day=date.getDate(), month=date.getMonth()+1, year=date.getFullYear();
-              var jd=Math.floor((1461*(year+4800+Math.floor((month-14)/12)))/4)+Math.floor((367*(month-2-12*Math.floor((month-14)/12)))/12)-Math.floor((3*Math.floor((year+4900+Math.floor((month-14)/12))/100))/4)+day-32075;
-              var l=jd-1948440+10632;
-              var n=Math.floor((l-1)/10631);
-              l=l-10631*n+354;
-              var j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);
-              l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;
-              var hMonth=Math.floor((24*l)/709);
-              var hDay=l-Math.floor((709*hMonth)/24);
-              var hYear=30*n+j-30;
-              return {day:hDay,month:hMonth,year:hYear};
-            }
-            function hijriDate(d){
-              var h=toHijri(d);
-              return toBn(h.day)+' '+hijriMonths[h.month-1]+' '+toBn(h.year)+' হিজরি';
-            }
-            var now=new Date();
-            var el=document.getElementById('today-date');
-            if(el) el.textContent = enDate(now)+' | '+bnDate(now)+' | '+hijriDate(now);
-          })();
-          </script>
+    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:20px;">
+      <a href="/" style="text-decoration:none;color:inherit;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+          <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
+          <h1 style="margin:0;text-align:center;">${escapeHtml(SITE_TITLE)}</h1>
         </div>
+        <p class="tagline" style="margin:6px auto 0;text-align:center;">${escapeHtml(SITE_TAGLINE)}</p>
+        <p id="today-date" style="margin:6px auto 0;font-size:11px;color:#888;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
+        <script>
+        (function(){
+          var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+          var bnWeekdays=['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+          var bnMonths=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+          var enMonths=['January','February','March','April','May','June','July','August','September','October','November','December'];
+          var hijriMonths=['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
+          function toBn(n){ return String(n).split('').map(function(ch){ return /\d/.test(ch)?bnDigits[ch]:ch; }).join(''); }
+          function bnDate(d){ return bnWeekdays[d.getDay()]+', '+toBn(d.getDate())+' '+bnMonths[d.getMonth()]+' '+toBn(d.getFullYear()); }
+          function enDate(d){ return d.getDate()+' '+enMonths[d.getMonth()]+' '+d.getFullYear(); }
+          function toHijri(date){
+            var day=date.getDate(), month=date.getMonth()+1, year=date.getFullYear();
+            var jd=Math.floor((1461*(year+4800+Math.floor((month-14)/12)))/4)+Math.floor((367*(month-2-12*Math.floor((month-14)/12)))/12)-Math.floor((3*Math.floor((year+4900+Math.floor((month-14)/12))/100))/4)+day-32075;
+            var l=jd-1948440+10632;
+            var n=Math.floor((l-1)/10631);
+            l=l-10631*n+354;
+            var j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);
+            l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;
+            var hMonth=Math.floor((24*l)/709);
+            var hDay=l-Math.floor((709*hMonth)/24);
+            var hYear=30*n+j-30;
+            return {day:hDay,month:hMonth,year:hYear};
+          }
+          function hijriDate(d){
+            var h=toHijri(d);
+            return toBn(h.day)+' '+hijriMonths[h.month-1]+' '+toBn(h.year)+' হিজরি';
+          }
+          var now=new Date();
+          var el=document.getElementById('today-date');
+          if(el) el.textContent = enDate(now)+' | '+bnDate(now)+' | '+hijriDate(now);
+        })();
+        </script>
       </a>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
         <p style="margin:0;font-size:12px;color:#888;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
@@ -219,19 +216,19 @@ function siteHeader(){
 const COUNTER_HTML = "<div style=\"margin-top:16px;text-align:center;\"><a href='https://www.free-counters.org/' style=\"font-size:11px;color:#999;\">powered by Free-Counters.org</a><script type='text/javascript' src='https://www.freevisitorcounters.com/auth.php?id=85ca76eaf26803643e138c9916d5d3fa90ec211a'></script><script type=\"text/javascript\" src=\"https://www.freevisitorcounters.com/en/home/counter/1642761/t/6\"></script></div>";
 
 function siteFooter(){
-  return `<footer>
+  return `<footer style="background:linear-gradient(135deg,#2e8b57 0%,#3aa1c7 55%,#4fc3f7 100%);color:#fff;">
     <div class="wrap">
-      <span>© ${toBnNumber(new Date().getFullYear())} <a href="/">হোমপেজ</a> ${escapeHtml(SITE_TITLE)}</span>
+      <span style="color:#fff;">© ${toBnNumber(new Date().getFullYear())} <a href="/" style="color:#fff;text-decoration:underline;">হোমপেজ</a> ${escapeHtml(SITE_TITLE)}</span>
       <div style="margin:14px 0;text-align:center;">
         <a href="https://www.facebook.com/share/1JY87mNj5v/" target="_blank" rel="noopener" style="display:inline-block;" aria-label="Facebook">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#1a5276"><path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
         </a>
       </div>
       <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;">
-        <a href="/about-us/">আমাদের সম্পর্কে</a>
-        <a href="/contact-us/">যোগাযোগ</a>
-        <a href="/privacy-policy/">গোপনীয়তা নীতি</a>
-        <a href="/terms-and-conditions/">শর্তাবলী</a>
+        <a href="/about-us/" style="color:#fff;">আমাদের সম্পর্কে</a>
+        <a href="/contact-us/" style="color:#fff;">যোগাযোগ</a>
+        <a href="/privacy-policy/" style="color:#fff;">গোপনীয়তা নীতি</a>
+        <a href="/terms-and-conditions/" style="color:#fff;">শর্তাবলী</a>
       </div>
       ${COUNTER_HTML}
     </div>
@@ -372,7 +369,6 @@ categories.forEach(cat => {
   urls.push(canonical);
 });
 
-// ===== স্ট্যাটিক পেজ (ফুটারে লিংক) =====
 function staticPageHtml(title, desc, bodyHtml, canonical){
   return `<!DOCTYPE html>
 <html lang="bn">
@@ -451,7 +447,6 @@ staticPages.forEach(p => {
   urls.push(canonical);
 });
 
-// ===== ই-পেপার (আপাতত প্লেসহোল্ডার, পরে পিডিএফ/ছবি যোগ করা যাবে) =====
 {
   const canonical = `${SITE_URL}/epaper/`;
   const html = staticPageHtml(
