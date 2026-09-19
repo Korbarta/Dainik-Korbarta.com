@@ -213,23 +213,16 @@ function siteHeader(){
   ${categoryNav()}`;
 }
 
-const COUNTER_HTML = "<div style=\"margin-top:16px;text-align:center;\"><a href='https://www.free-counters.org/' style=\"font-size:11px;color:#999;\">powered by Free-Counters.org</a><script type='text/javascript' src='https://www.freevisitorcounters.com/auth.php?id=85ca76eaf26803643e138c9916d5d3fa90ec211a'></script><script type=\"text/javascript\" src=\"https://www.freevisitorcounters.com/en/home/counter/1642761/t/6\"></script></div>";
-
 function siteFooter(){
   return `<footer style="background:linear-gradient(135deg,#2e8b57 0%,#3aa1c7 55%,#4fc3f7 100%);color:#fff;">
     <div class="wrap">
       <span style="color:#fff;">© ${toBnNumber(new Date().getFullYear())} <a href="/" style="color:#fff;text-decoration:underline;">হোমপেজ</a> ${escapeHtml(SITE_TITLE)}</span>
-      <div style="margin:14px 0;text-align:center;">
-        <a href="https://www.facebook.com/share/1JY87mNj5v/" target="_blank" rel="noopener" style="display:inline-block;" aria-label="Facebook">
-              <div style="margin:14px 0;text-align:center;display:flex;justify-content:center;gap:16px;">
+      <div style="margin:14px 0;text-align:center;display:flex;justify-content:center;gap:16px;">
         <a href="https://www.facebook.com/share/1JY87mNj5v/" target="_blank" rel="noopener" style="display:inline-block;" aria-label="Facebook">
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
         </a>
         <a href="https://x.com/dainikkorbarta" target="_blank" rel="noopener" style="display:inline-block;" aria-label="X (Twitter)">
           <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </a>
-      </div>
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
         </a>
       </div>
       <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;">
@@ -238,7 +231,6 @@ function siteFooter(){
         <a href="/privacy-policy/" style="color:#fff;">গোপনীয়তা নীতি</a>
         <a href="/terms-and-conditions/" style="color:#fff;">শর্তাবলী</a>
       </div>
-      ${COUNTER_HTML}
     </div>
   </footer>`;
 }
