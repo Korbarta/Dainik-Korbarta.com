@@ -261,8 +261,9 @@ function articlePageHtml(a, slug){
     ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" style="margin-bottom:16px;width:100%;">` : ''}
     <span class="cat-tag">${escapeHtml(a.category)}</span>
     <h1 style="font-size:clamp(1.5rem,4vw,2.1rem);margin:10px 0 12px;line-height:1.35;">${escapeHtml(a.title)}</h1>
-    <div class="meta">${formatDateBn(d)}</div>
+    <div class="meta">${formatDateBn(d)}${a.reporter ? ' | প্রতিবেদক: ' + escapeHtml(a.reporter) : ''}</div>
     <div class="body-text" style="margin-top:20px;">${bodyToHtml(a.body)}</div>
+    ${adBanner()}
   </main>
   ${siteFooter()}
 </body>
@@ -301,12 +302,23 @@ function articleCard(a, big){
   </a>`;
 }
 
+function adBanner(){
+  const ad = settings.advertisement;
+  if (!ad || !ad.ad_image) return '';
+  const img = `<img src="${escapeHtml(ad.ad_image)}" alt="${escapeHtml(ad.advertiser_name || 'বিজ্ঞাপন')}" style="max-width:100%;border-radius:6px;">`;
+  return `<div style="margin:20px 0;text-align:center;">
+    <div style="font-size:11px;color:#999;margin-bottom:4px;">বিজ্ঞাপন</div>
+    ${ad.ad_link ? `<a href="${escapeHtml(ad.ad_link)}" target="_blank" rel="noopener sponsored">${img}</a>` : img}
+  </div>`;
+}
+
 function latestSidebar(list){
   const items = list.slice(0, 8).map(a => {
     const slug = slugOf(a);
     return `<a href="/article/${slug}/" style="display:block;text-decoration:none;color:#222;padding:10px 0;border-bottom:1px solid #eee;font-size:14px;line-height:1.5;">${escapeHtml(a.title)}</a>`;
   }).join('');
   return `<aside style="background:#fafafa;border-radius:8px;padding:16px;">
+    ${adBanner()}
     <h3 style="margin:0 0 10px;font-size:1.1rem;border-bottom:2px solid #1a5276;padding-bottom:8px;">সর্বশেষ</h3>
     ${items || '<p>কোনো সংবাদ নেই।</p>'}
   </aside>`;
