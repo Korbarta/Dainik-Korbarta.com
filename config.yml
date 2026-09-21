@@ -26,7 +26,7 @@ collections:
               - label: "বিভাগ"
                 name: "category"
                 widget: "select"
-                options: ["সারাদেশ","জাতীয়","অর্থনীতি","খেলা","বিনোদন","রাজনীতি","বিজ্ঞান ও প্রযুক্তি","আন্তর্জাতিক","যোগাযোগ","মতামত","স্বাস্থ্য","পাঠক সংবাদ"]
+                options: ["সারাদেশ","জেলা সংবাদ","মফস্বল সংবাদ","জাতীয়","অর্থনীতি","খেলা","বিনোদন","রাজনীতি","বিজ্ঞান ও প্রযুক্তি","আন্তর্জাতিক","যোগাযোগ","মতামত","স্বাস্থ্য","পাঠক সংবাদ"]
               - {label: "প্রতিবেদক", name: "reporter", widget: "string", required: false, hint: "সংবাদটি কে লিখেছেন তার নাম"}
               - {label: "ছবি (ঐচ্ছিক)", name: "image", widget: "image", required: false}
               - {label: "সংক্ষিপ্তসার", name: "excerpt", widget: "text"}
@@ -54,4 +54,4 @@ collections:
             fields:
               - {label: "বিজ্ঞাপনদাতার নাম", name: "advertiser_name", widget: "string", required: false}
               - {label: "বিজ্ঞাপনের ছবি", name: "ad_image", widget: "image", required: false, hint: "প্রস্তাবিত সাইজ: ৩০০x২৫০ বা ৭২৮x৯০ পিক্সেল"}
-              - {label: "ক্লিক করলে যে লিংকে যাবে", name: "ad_link", widget: "string", required: false, hint: "যেমন: বিজ্ঞাপনদাতার ওয়েবসাইট বা ফেসবুক পেজ"}
+              - {label: "ক্লিক করলে যে লিংকে যাবে", name: "ad_link", widget: "string", required: false, hint: "যেমন: বিজ্ঞাপনদাতার ওয়েবসাইট"}
