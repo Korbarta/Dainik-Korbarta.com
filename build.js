@@ -10,9 +10,9 @@ const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
 const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const HIJRI_MONTHS_BN = ['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
 
-const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
+const CATEGORY_ORDER = ['সারাদেশ','জেলা সংবাদ','মফস্বল সংবাদ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
 
-const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','স্বাস্থ্য','পাঠক সংবাদ'];
+const NAV_EXTRA_CATEGORIES = ['জেলা সংবাদ','মফস্বল সংবাদ','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','স্বাস্থ্য','পাঠক সংবাদ'];
 
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
@@ -114,12 +114,12 @@ function pageHead(title, desc, canonical, ogImage){
     .breaking-track { display:inline-block; white-space:nowrap; animation: marquee 25s linear infinite; }
   </style>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RDPGCW8RSL"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MX0Q3361L2"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-RDPGCW8RSL');
+    gtag('config', 'G-MX0Q3361L2');
   </script>`;
 }
 
@@ -169,7 +169,7 @@ function siteHeader(){
           <h1 style="margin:0;text-align:center;">${escapeHtml(SITE_TITLE)}</h1>
         </div>
         <p class="tagline" style="margin:6px auto 0;text-align:center;">${escapeHtml(SITE_TAGLINE)}</p>
-        <p id="today-date" style="margin:6px auto 0;font-size:11px;color:#888;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
+        <p id="today-date" style="margin:6px auto 0;font-size:12px;font-weight:bold;color:#e67e22;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
         <script>
         (function(){
           var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
