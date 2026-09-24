@@ -10,9 +10,14 @@ const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
 const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const HIJRI_MONTHS_BN = ['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
 
-const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত'];
+// [নতুন] 'সাহিত্য পাতা' যোগ করা হয়েছে
+const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত','সাহিত্য পাতা'];
 
-const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','স্বাস্থ্য','পাঠক সংবাদ','জেলা সংবাদ','মফস্বল সংবাদ'];
+// [নতুন] 'সাহিত্য পাতা' যোগ করা হয়েছে (কোনো লেখা না থাকলেও মেনুতে দেখাবে)
+const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','স্বাস্থ্য','পাঠক সংবাদ','জেলা সংবাদ','মফস্বল সংবাদ','সাহিত্য পাতা'];
+
+// [নতুন] খবরের পাতার তারিখের রং (হালকা সবুজ, গাঢ় নয়)
+const DATE_COLOR = '#43A047';
 
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
@@ -71,6 +76,43 @@ function catSlugify(cat){
   return String(cat).trim().replace(/\s+/g, '-');
 }
 
+// [নতুন] ছবির ঠিকানা পূর্ণাঙ্গ (https://...) করা
+function absUrl(u){
+  if (!u) return '';
+  if (/^https?:\/\//.test(u)) return u;
+  return SITE_URL + (String(u).startsWith('/') ? u : '/' + u);
+}
+
+// [নতুন] নিরাপদভাবে তারিখকে ISO ফরম্যাটে রূপান্তর (ভুল তারিখ থাকলে build বন্ধ হবে না)
+function safeIso(value, fallback){
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? fallback.toISOString() : d.toISOString();
+}
+
+// [নতুন] Google NewsArticle structured data (JSON-LD)
+function newsArticleSchema(a, canonical){
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "mainEntityOfPage": { "@type": "WebPage", "@id": canonical },
+    "headline": String(a.title || '').slice(0, 110),
+    "image": [a.image ? absUrl(a.image) : `${SITE_URL}/logo.png`],
+    "datePublished": safeIso(a.date, BUILD_TIME),
+    "dateModified": safeIso(a.updated || a.date, BUILD_TIME),
+    "author": a.reporter
+      ? [{ "@type": "Person", "name": String(a.reporter) }]
+      : [{ "@type": "Organization", "name": SITE_TITLE, "url": SITE_URL }],
+    "publisher": {
+      "@type": "Organization",
+      "name": SITE_TITLE,
+      "logo": { "@type": "ImageObject", "url": `${SITE_URL}/logo.png` }
+    },
+    "description": String(a.body || '').replace(/\s+/g, ' ').trim().slice(0, 160)
+  };
+  const json = JSON.stringify(data).replace(/</g, '\\u003c');
+  return '<script type="application/ld+json">' + json + '</script>';
+}
+
 function readJson(p){ return JSON.parse(fs.readFileSync(p, 'utf8')); }
 
 const articlesData = readJson('content/articles.json');
@@ -97,7 +139,8 @@ NAV_EXTRA_CATEGORIES.forEach(c => {
   if (!categories.includes(c)) categories.push(c);
 });
 
-function pageHead(title, desc, canonical, ogImage){
+// [পরিবর্তিত] extraHead যোগ করা হয়েছে, যাতে খবরের পাতায় JSON-LD বসানো যায়
+function pageHead(title, desc, canonical, ogImage, extraHead){
   return `<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)}</title>
@@ -120,7 +163,8 @@ function pageHead(title, desc, canonical, ogImage){
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-RDPGCW8RSL');
-  </script>`;
+  </script>
+  ${extraHead || ''}`;
 }
 
 function categoryNav(){
@@ -252,7 +296,7 @@ function articlePageHtml(a, slug){
   return `<!DOCTYPE html>
 <html lang="bn">
 <head>
-  ${pageHead(title, desc, canonical, a.image)}
+  ${pageHead(title, desc, canonical, a.image, newsArticleSchema(a, canonical))}
 </head>
 <body>
   ${siteHeader()}
@@ -261,7 +305,7 @@ function articlePageHtml(a, slug){
     ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" style="margin-bottom:16px;width:100%;">` : ''}
     <span class="cat-tag">${escapeHtml(a.category)}</span>
     <h1 style="font-size:clamp(1.5rem,4vw,2.1rem);margin:10px 0 12px;line-height:1.35;">${escapeHtml(a.title)}</h1>
-    <div class="meta"><strong style="color:#2e8b57;">${formatDateBn(d)}</strong>${a.reporter ? ' | প্রতিবেদক: ' + escapeHtml(a.reporter) : ''}</div>
+    <div class="meta"><strong style="color:${DATE_COLOR};font-weight:700;">${formatDateBn(d)}</strong>${a.reporter ? ' | প্রতিবেদক: ' + escapeHtml(a.reporter) : ''}</div>
     <div class="body-text" style="margin-top:20px;">${bodyToHtml(a.body)}</div>
     ${adBanner()}
   </main>
