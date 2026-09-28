@@ -10,6 +10,9 @@ const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
 const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const HIJRI_MONTHS_BN = ['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
 
+// [নতুন] বঙ্গাব্দের মাসের নাম
+const BANGLA_CAL_MONTHS = ['বৈশাখ','জ্যৈষ্ঠ','আষাঢ়','শ্রাবণ','ভাদ্র','আশ্বিন','কার্তিক','অগ্রহায়ণ','পৌষ','মাঘ','ফাল্গুন','চৈত্র'];
+
 // [নতুন] 'সাহিত্য পাতা' যোগ করা হয়েছে
 const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত','সাহিত্য পাতা'];
 
@@ -35,6 +38,27 @@ function formatDateTimeBn(d){
 function formatDateEn(d){
   return `${d.getDate()} ${EN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
+
+// [নতুন] বাংলাদেশের সংশোধিত বাংলা বর্ষপঞ্জি (১৪ এপ্রিল = ১ বৈশাখ) অনুযায়ী বঙ্গাব্দ
+function gregorianToBangla(date){
+  const y = date.getFullYear();
+  const today = Date.UTC(y, date.getMonth(), date.getDate());
+  let startYear = y;
+  if (today < Date.UTC(y, 3, 14)) startYear = y - 1;
+  const start = Date.UTC(startYear, 3, 14);
+  let days = Math.round((today - start) / 86400000);
+  const nextY = startYear + 1;
+  const isLeap = (nextY % 4 === 0 && nextY % 100 !== 0) || nextY % 400 === 0;
+  const lengths = [31,31,31,31,31,31,30,30,30,30,isLeap ? 30 : 29,30];
+  let m = 0;
+  while (m < 11 && days >= lengths[m]) { days -= lengths[m]; m++; }
+  return { day: days + 1, month: m, year: startYear - 593 };
+}
+function formatBanglaCalBn(date){
+  const b = gregorianToBangla(date);
+  return `${BN_WEEKDAYS[date.getDay()]}, ${toBnNumber(b.day)} ${BANGLA_CAL_MONTHS[b.month]} ${toBnNumber(b.year)} বঙ্গাব্দ`;
+}
+
 function gregorianToHijri(date){
   const day = date.getDate();
   const month = date.getMonth() + 1;
@@ -203,6 +227,7 @@ function topBar(){
   </div>`;
 }
 
+// [পরিবর্তিত] মাঝের তারিখ এখন বঙ্গাব্দে (যেমন: সোমবার, ১৩ আশ্বিন ১৪৩৩ বঙ্গাব্দ)
 function siteHeader(){
   return `${topBar()}
   <header class="masthead">
@@ -213,16 +238,27 @@ function siteHeader(){
           <h1 style="margin:0;text-align:center;">${escapeHtml(SITE_TITLE)}</h1>
         </div>
         <p class="tagline" style="margin:6px auto 0;text-align:center;">${escapeHtml(SITE_TAGLINE)}</p>
-        <p id="today-date" style="margin:6px auto 0;font-size:11px;color:#888;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatDateBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
+        <p id="today-date" style="margin:6px auto 0;font-size:11px;color:#888;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatBanglaCalBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
         <script>
         (function(){
           var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
           var bnWeekdays=['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
-          var bnMonths=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+          var bnCalMonths=['বৈশাখ','জ্যৈষ্ঠ','আষাঢ়','শ্রাবণ','ভাদ্র','আশ্বিন','কার্তিক','অগ্রহায়ণ','পৌষ','মাঘ','ফাল্গুন','চৈত্র'];
           var enMonths=['January','February','March','April','May','June','July','August','September','October','November','December'];
           var hijriMonths=['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
           function toBn(n){ return String(n).split('').map(function(ch){ return /\d/.test(ch)?bnDigits[ch]:ch; }).join(''); }
-          function bnDate(d){ return bnWeekdays[d.getDay()]+', '+toBn(d.getDate())+' '+bnMonths[d.getMonth()]+' '+toBn(d.getFullYear()); }
+          function banglaCal(d){
+            var y=d.getFullYear();
+            var today=Date.UTC(y,d.getMonth(),d.getDate());
+            var startYear=(today<Date.UTC(y,3,14))?y-1:y;
+            var days=Math.round((today-Date.UTC(startYear,3,14))/86400000);
+            var ny=startYear+1;
+            var leap=(ny%4===0&&ny%100!==0)||ny%400===0;
+            var lengths=[31,31,31,31,31,31,30,30,30,30,leap?30:29,30];
+            var m=0;
+            while(m<11&&days>=lengths[m]){ days-=lengths[m]; m++; }
+            return bnWeekdays[d.getDay()]+', '+toBn(days+1)+' '+bnCalMonths[m]+' '+toBn(startYear-593)+' বঙ্গাব্দ';
+          }
           function enDate(d){ return d.getDate()+' '+enMonths[d.getMonth()]+' '+d.getFullYear(); }
           function toHijri(date){
             var day=date.getDate(), month=date.getMonth()+1, year=date.getFullYear();
@@ -243,7 +279,7 @@ function siteHeader(){
           }
           var now=new Date();
           var el=document.getElementById('today-date');
-          if(el) el.textContent = enDate(now)+' | '+bnDate(now)+' | '+hijriDate(now);
+          if(el) el.textContent = enDate(now)+' | '+banglaCal(now)+' | '+hijriDate(now);
         })();
         </script>
       </a>
