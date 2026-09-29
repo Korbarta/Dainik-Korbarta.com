@@ -4,6 +4,9 @@ const path = require('path');
 
 const SITE_URL = 'https://dainikkorbarta.com';
 
+// [নতুন] ইংরেজি নাম — টাইটেল ও ডেসক্রিপশনে কমন কিওয়ার্ড হিসেবে ব্যবহার হবে
+const SITE_NAME_EN = 'Dainik Korbarta';
+
 const BN_WEEKDAYS = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
 const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
 const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
@@ -404,9 +407,10 @@ function latestSidebar(list){
   </aside>`;
 }
 
+// [পরিবর্তিত] হোমপেজের টাইটেল ও ডেসক্রিপশনে এখন কমন কিওয়ার্ড আছে (SEO)
 function homePageHtml(){
-  const title = `${escapeHtml(SITE_TITLE)}${SITE_TAGLINE ? ' — ' + escapeHtml(SITE_TAGLINE) : ''}`;
-  const desc = escapeHtml(SITE_TAGLINE || 'বাংলাদেশের সর্বশেষ সংবাদ');
+  const title = `${SITE_TITLE}${SITE_TAGLINE ? ' — ' + SITE_TAGLINE : ''} | ${SITE_NAME_EN}`;
+  const desc = `${SITE_TITLE} (${SITE_NAME_EN})${SITE_TAGLINE ? ' — ' + SITE_TAGLINE + '।' : '।'} রাজনীতি, খেলাধূলা, বিজ্ঞান ও প্রযুক্তি, স্বাস্থ্য, জেলা ও মফস্বলের সর্বশেষ বাংলা সংবাদ পড়ুন ${SITE_TITLE}য়।`;
   const canonical = `${SITE_URL}/`;
 
   const hero = sortedArticles[0];
