@@ -202,6 +202,7 @@ function siteSchema(){
 }
 
 // [পরিবর্তিত] সম্পূর্ণ Open Graph, Twitter কার্ড, Schema ও আপডেটের সময় যোগ করা হয়েছে
+// [নতুন] সংবাদ row আকারে দেখানোর ও মোবাইলে সাইডবার নিচে নামানোর CSS যোগ করা হয়েছে
 function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso){
   const img = ogImage ? absUrl(ogImage) : `${SITE_URL}/logo.png`;
   const updated = updatedIso || BUILD_TIME.toISOString();
@@ -229,6 +230,17 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
   <style>
     @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     .breaking-track { display:inline-block; white-space:nowrap; animation: marquee 25s linear infinite; }
+    .home-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; }
+    @media (max-width: 800px) { .home-grid { grid-template-columns:minmax(0,1fr); } }
+    .news-row { display:flex; gap:14px; align-items:flex-start; text-decoration:none; color:inherit; padding:14px 0; border-bottom:1px solid #eee; }
+    .news-row .row-img { width:150px; height:100px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+    .news-row .row-text { flex:1; min-width:0; }
+    .news-row .row-title { font-size:1.05rem; margin:4px 0; line-height:1.45; }
+    .news-row .row-excerpt { font-size:14px; color:#555; margin:4px 0 6px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    @media (max-width: 480px) {
+      .news-row .row-img { width:110px; height:78px; }
+      .news-row .row-title { font-size:1rem; }
+    }
   </style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-RDPGCW8RSL"></script>
@@ -417,6 +429,14 @@ articles.forEach((a) => {
 fs.mkdirSync('content', { recursive: true });
 fs.writeFileSync('content/article-slugs.json', JSON.stringify(slugMap, null, 2));
 
+// [নতুন] সারির জন্য সংক্ষিপ্তসার (না থাকলে বিস্তারিত সংবাদের শুরুর অংশ)
+function shortExcerpt(a){
+  const src = a.excerpt || a.body || '';
+  const clean = String(src).replace(/\s+/g, ' ').trim();
+  return clean.length > 160 ? clean.slice(0, 160) + '…' : clean;
+}
+
+// [পরিবর্তিত] ছোট সংবাদগুলো এখন row আকারে: বামে ছবি, ডানে বিভাগ, শিরোনাম, সংক্ষিপ্তসার ও তারিখ
 function articleCard(a, big){
   const slug = slugOf(a);
   const d = new Date(a.date);
@@ -428,11 +448,13 @@ function articleCard(a, big){
       <div class="meta">${formatDateBn(d)}</div>
     </a>`;
   }
-  return `<a href="/article/${slug}/" style="display:flex;gap:12px;text-decoration:none;color:inherit;padding:14px 0;border-bottom:1px solid #eee;">
-    ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" style="width:110px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;">` : ''}
-    <div>
+  const ex = shortExcerpt(a);
+  return `<a href="/article/${slug}/" class="news-row">
+    ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" class="row-img">` : ''}
+    <div class="row-text">
       <span class="cat-tag">${escapeHtml(a.category)}</span>
-      <h3 style="font-size:1rem;margin:4px 0;line-height:1.4;">${escapeHtml(a.title)}</h3>
+      <h3 class="row-title">${escapeHtml(a.title)}</h3>
+      ${ex ? `<p class="row-excerpt">${escapeHtml(ex)}</p>` : ''}
       <div class="meta" style="font-size:12px;">${formatDateBn(d)}</div>
     </div>
   </a>`;
@@ -461,6 +483,7 @@ function latestSidebar(list){
 }
 
 // [পরিবর্তিত] হোমপেজের টাইটেল ও ডেসক্রিপশনে কমন কিওয়ার্ড আছে, ডেসক্রিপশন ১৬০ অক্ষরের মধ্যে (SEO)
+// [পরিবর্তিত] মোবাইলে সাইডবার এখন সংবাদের নিচে যায়, সংবাদ পুরো চওড়ায় row আকারে দেখায়
 function homePageHtml(){
   const title = `${SITE_TITLE}${SITE_TAGLINE ? ' — ' + SITE_TAGLINE : ''} | ${SITE_NAME_EN}`;
   const desc = `${SITE_TITLE} (${SITE_NAME_EN})${SITE_TAGLINE ? ' — ' + SITE_TAGLINE + '।' : '।'} রাজনীতি, খেলা, প্রযুক্তি, স্বাস্থ্য ও জেলার সর্বশেষ বাংলা সংবাদ।`;
@@ -468,7 +491,7 @@ function homePageHtml(){
 
   const hero = sortedArticles[0];
   const rest = sortedArticles.slice(1);
-  const gridCards = rest.map(a => `<div>${articleCard(a, false)}</div>`).join('');
+  const rowCards = rest.map(a => articleCard(a, false)).join('');
 
   return `<!DOCTYPE html>
 <html lang="bn">
@@ -477,10 +500,10 @@ function homePageHtml(){
 </head>
 <body>
   ${siteHeader()}
-  <main class="wrap" style="max-width:1100px;padding:24px 20px 60px;display:grid;grid-template-columns:1fr 300px;gap:24px;">
-    <div>
+  <main class="wrap home-grid" style="max-width:1100px;padding:24px 20px 60px;">
+    <div style="min-width:0;">
       ${hero ? articleCard(hero, true) : '<p>এখনো কোনো সংবাদ প্রকাশিত হয়নি।</p>'}
-      <div style="margin-top:20px;">${gridCards}</div>
+      <div style="margin-top:20px;">${rowCards}</div>
     </div>
     ${latestSidebar(sortedArticles)}
   </main>
