@@ -241,6 +241,18 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
       .news-row .row-img { width:110px; height:78px; }
       .news-row .row-title { font-size:1rem; }
     }
+    .news-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; }
+    @media (max-width: 900px) { .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 520px) { .news-grid { grid-template-columns:minmax(0,1fr); } }
+    .news-card { display:flex; flex-direction:column; text-decoration:none; color:inherit; background:#fff; border:1px solid #e6e6e6; border-radius:8px; overflow:hidden; }
+    .news-card:hover { border-color:#1a5276; }
+    .news-card .card-img { width:100%; aspect-ratio:16/10; object-fit:cover; display:block; background:#f0f4f2; }
+    .news-card .card-noimg { width:100%; aspect-ratio:16/10; display:flex; align-items:center; justify-content:center; background:#eef4f0; }
+    .news-card .card-noimg img { width:64px; height:64px; border-radius:50%; opacity:.85; }
+    .news-card .card-body { padding:10px 12px 12px; display:flex; flex-direction:column; flex:1; }
+    .news-card .card-title { font-size:1rem; margin:4px 0 6px; line-height:1.45; }
+    .news-card .card-excerpt { font-size:13.5px; color:#555; margin:0 0 8px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .news-card .meta { margin-top:auto; font-size:12px; }
   </style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-RDPGCW8RSL"></script>
@@ -460,6 +472,25 @@ function articleCard(a, big){
   </a>`;
 }
 
+// [নতুন] পাশাপাশি কার্ডের জন্য: ওপরে ছবি (না থাকলে লোগো), নিচে বিভাগ, শিরোনাম, সংক্ষিপ্তসার ও তারিখ
+function articleGridCard(a){
+  const slug = slugOf(a);
+  const d = new Date(a.date);
+  const ex = shortExcerpt(a);
+  const pic = a.image
+    ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" class="card-img" loading="lazy">`
+    : `<div class="card-noimg"><img src="/logo.png" alt=""></div>`;
+  return `<a href="/article/${slug}/" class="news-card">
+    ${pic}
+    <div class="card-body">
+      <span class="cat-tag">${escapeHtml(a.category)}</span>
+      <h3 class="card-title">${escapeHtml(a.title)}</h3>
+      ${ex ? `<p class="card-excerpt">${escapeHtml(ex)}</p>` : ''}
+      <div class="meta">${formatDateBn(d)}</div>
+    </div>
+  </a>`;
+}
+
 function adBanner(){
   const ad = settings.advertisement;
   if (!ad || !ad.ad_image) return '';
@@ -483,7 +514,7 @@ function latestSidebar(list){
 }
 
 // [পরিবর্তিত] হোমপেজের টাইটেল ও ডেসক্রিপশনে কমন কিওয়ার্ড আছে, ডেসক্রিপশন ১৬০ অক্ষরের মধ্যে (SEO)
-// [পরিবর্তিত] মোবাইলে সাইডবার এখন সংবাদের নিচে যায়, সংবাদ পুরো চওড়ায় row আকারে দেখায়
+// [পরিবর্তিত] সংবাদ এখন পাশাপাশি কার্ডে (কম্পিউটারে ৩টি, ট্যাবে ২টি, মোবাইলে ১টি); মোবাইলে সাইডবার নিচে যায়
 function homePageHtml(){
   const title = `${SITE_TITLE}${SITE_TAGLINE ? ' — ' + SITE_TAGLINE : ''} | ${SITE_NAME_EN}`;
   const desc = `${SITE_TITLE} (${SITE_NAME_EN})${SITE_TAGLINE ? ' — ' + SITE_TAGLINE + '।' : '।'} রাজনীতি, খেলা, প্রযুক্তি, স্বাস্থ্য ও জেলার সর্বশেষ বাংলা সংবাদ।`;
@@ -491,7 +522,7 @@ function homePageHtml(){
 
   const hero = sortedArticles[0];
   const rest = sortedArticles.slice(1);
-  const rowCards = rest.map(a => articleCard(a, false)).join('');
+  const rowCards = rest.map(a => articleGridCard(a)).join('');
 
   return `<!DOCTYPE html>
 <html lang="bn">
@@ -503,7 +534,7 @@ function homePageHtml(){
   <main class="wrap home-grid" style="max-width:1100px;padding:24px 20px 60px;">
     <div style="min-width:0;">
       ${hero ? articleCard(hero, true) : '<p>এখনো কোনো সংবাদ প্রকাশিত হয়নি।</p>'}
-      <div style="margin-top:20px;">${rowCards}</div>
+      <div class="news-grid" style="margin-top:20px;">${rowCards}</div>
     </div>
     ${latestSidebar(sortedArticles)}
   </main>
@@ -519,7 +550,7 @@ categories.forEach(cat => {
   const slug = catSlugify(cat);
   const title = `${escapeHtml(cat)} - ${escapeHtml(SITE_TITLE)}`;
   const canonical = `${SITE_URL}/category/${slug}/`;
-  const items = catArticles.map(a => articleCard(a, false)).join('');
+  const items = catArticles.map(a => articleGridCard(a)).join('');
 
   const html = `<!DOCTYPE html>
 <html lang="bn">
@@ -528,9 +559,9 @@ categories.forEach(cat => {
 </head>
 <body>
   ${siteHeader()}
-  <main class="wrap" style="max-width:760px;padding:24px 20px 60px;">
+  <main class="wrap" style="max-width:1100px;padding:24px 20px 60px;">
     <h2 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">${escapeHtml(cat)}</h2>
-    ${items || '<p>এই বিভাগে এখনো কোনো সংবাদ নেই।</p>'}
+    ${items ? `<div class="news-grid">${items}</div>` : '<p>এই বিভাগে এখনো কোনো সংবাদ নেই।</p>'}
   </main>
   ${siteFooter()}
 </body>
