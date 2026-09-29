@@ -407,10 +407,10 @@ function latestSidebar(list){
   </aside>`;
 }
 
-// [পরিবর্তিত] হোমপেজের টাইটেল ও ডেসক্রিপশনে এখন কমন কিওয়ার্ড আছে (SEO)
+// [পরিবর্তিত] হোমপেজের টাইটেল ও ডেসক্রিপশনে কমন কিওয়ার্ড আছে, ডেসক্রিপশন ১৬০ অক্ষরের মধ্যে (SEO)
 function homePageHtml(){
   const title = `${SITE_TITLE}${SITE_TAGLINE ? ' — ' + SITE_TAGLINE : ''} | ${SITE_NAME_EN}`;
-  const desc = `${SITE_TITLE} (${SITE_NAME_EN})${SITE_TAGLINE ? ' — ' + SITE_TAGLINE + '।' : '।'} রাজনীতি, খেলাধূলা, বিজ্ঞান ও প্রযুক্তি, স্বাস্থ্য, জেলা ও মফস্বলের সর্বশেষ বাংলা সংবাদ পড়ুন ${SITE_TITLE}য়।`;
+  const desc = `${SITE_TITLE} (${SITE_NAME_EN})${SITE_TAGLINE ? ' — ' + SITE_TAGLINE + '।' : '।'} রাজনীতি, খেলা, প্রযুক্তি, স্বাস্থ্য ও জেলার সর্বশেষ বাংলা সংবাদ।`;
   const canonical = `${SITE_URL}/`;
 
   const hero = sortedArticles[0];
