@@ -151,6 +151,8 @@ if (fs.existsSync('category')) fs.rmSync('category', { recursive: true, force: t
 fs.mkdirSync('article');
 
 const urls = [`${SITE_URL}/`];
+// [নতুন] সাইটম্যাপে প্রতিটি পাতার শেষ আপডেটের সময় (lastmod)
+const lastmodMap = {};
 
 const SITE_TITLE = settings.site_title || 'দৈনিক করবার্তা';
 const SITE_TAGLINE = settings.tagline || '';
@@ -166,18 +168,63 @@ NAV_EXTRA_CATEGORIES.forEach(c => {
   if (!categories.includes(c)) categories.push(c);
 });
 
-// [পরিবর্তিত] extraHead যোগ করা হয়েছে, যাতে খবরের পাতায় JSON-LD বসানো যায়
-function pageHead(title, desc, canonical, ogImage, extraHead){
+// [নতুন] পুরো সাইটের Schema.org তথ্য (সংবাদমাধ্যম + ওয়েবসাইট) — প্রতিটি পাতায় বসবে
+function siteSchema(){
+  const data = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "NewsMediaOrganization",
+        "@id": `${SITE_URL}/#organization`,
+        "name": SITE_TITLE,
+        "alternateName": SITE_NAME_EN,
+        "url": `${SITE_URL}/`,
+        "logo": { "@type": "ImageObject", "url": `${SITE_URL}/logo.png` },
+        "email": "dainikkorbarta@gmail.com",
+        "sameAs": [
+          "https://www.facebook.com/share/1JY87mNj5v/",
+          "https://x.com/dainikkorbarta"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        "url": `${SITE_URL}/`,
+        "name": SITE_TITLE,
+        "alternateName": SITE_NAME_EN,
+        "inLanguage": "bn",
+        "publisher": { "@id": `${SITE_URL}/#organization` }
+      }
+    ]
+  };
+  const json = JSON.stringify(data).replace(/</g, '\\u003c');
+  return '<script type="application/ld+json">' + json + '</script>';
+}
+
+// [পরিবর্তিত] সম্পূর্ণ Open Graph, Twitter কার্ড, Schema ও আপডেটের সময় যোগ করা হয়েছে
+function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso){
+  const img = ogImage ? absUrl(ogImage) : `${SITE_URL}/logo.png`;
+  const updated = updatedIso || BUILD_TIME.toISOString();
   return `<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeHtml(desc)}">
   <link rel="canonical" href="${canonical}">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="${ogType || 'website'}">
+  <meta property="og:site_name" content="${escapeHtml(SITE_TITLE)}">
+  <meta property="og:locale" content="bn_BD">
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(desc)}">
   <meta property="og:url" content="${canonical}">
-  ${ogImage ? `<meta property="og:image" content="${escapeHtml(ogImage)}">` : ''}
+  <meta property="og:image" content="${escapeHtml(img)}">
+  <meta property="og:image:alt" content="${escapeHtml(title)}">
+  <meta property="og:updated_time" content="${updated}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dainikkorbarta">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(desc)}">
+  <meta name="twitter:image" content="${escapeHtml(img)}">
+  ${siteSchema()}
   <link rel="stylesheet" href="/style.css">
   <style>
     @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
@@ -335,7 +382,12 @@ function articlePageHtml(a, slug){
   return `<!DOCTYPE html>
 <html lang="bn">
 <head>
-  ${pageHead(title, desc, canonical, a.image, newsArticleSchema(a, canonical))}
+  ${pageHead(title, desc, canonical, a.image,
+    newsArticleSchema(a, canonical) +
+    `<meta property="article:published_time" content="${safeIso(a.date, BUILD_TIME)}">` +
+    `<meta property="article:modified_time" content="${safeIso(a.updated || a.date, BUILD_TIME)}">` +
+    (a.category ? `<meta property="article:section" content="${escapeHtml(a.category)}">` : ''),
+    'article', safeIso(a.updated || a.date, BUILD_TIME))}
 </head>
 <body>
   ${siteHeader()}
@@ -359,6 +411,7 @@ articles.forEach((a) => {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'index.html'), articlePageHtml(a, slug));
   urls.push(`${SITE_URL}/article/${slug}/`);
+  lastmodMap[`${SITE_URL}/article/${slug}/`] = safeIso(a.updated || a.date, BUILD_TIME);
 });
 
 fs.mkdirSync('content', { recursive: true });
@@ -561,7 +614,7 @@ staticPages.forEach(p => {
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(u => `  <url><loc>${u}</loc></url>`).join('\n')}
+${urls.map(u => `  <url><loc>${u}</loc><lastmod>${lastmodMap[u] || BUILD_TIME.toISOString()}</lastmod></url>`).join('\n')}
 </urlset>
 `;
 fs.writeFileSync('sitemap.xml', sitemap);
