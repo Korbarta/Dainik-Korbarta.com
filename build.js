@@ -255,12 +255,12 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .news-card .meta { margin-top:auto; font-size:12px; }
   </style>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RDPGCW8RSL"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MX0Q3361L2"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-RDPGCW8RSL');
+    gtag('config', 'G-MX0Q3361L2');
   </script>
   ${extraHead || ''}`;
 }
