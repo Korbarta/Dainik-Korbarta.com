@@ -595,7 +595,7 @@ function latestSidebar(list){
 }
 
 // [পরিবর্তিত] হোমপেজের টাইটেল ও ডেসক্রিপশনে কমন কিওয়ার্ড আছে, ডেসক্রিপশন ১৬০ অক্ষরের মধ্যে (SEO)
-// [পরিবর্তিত] বামে বিজ্ঞাপন বক্স যোগ হয়েছে; মাঝে খবর পাশাপাশি ২টি করে; মোবাইলে সব একটার নিচে আরেকটা
+// [পরিবর্তিত] বামে বিজ্ঞাপন বক্স যোগ হয়েছে (পেজ আরও চওড়া করে বক্স আরও বামে নেওয়া হয়েছে); মাঝে খবর পাশাপাশি ২টি করে; মোবাইলে সব একটার নিচে আরেকটা
 function homePageHtml(){
   const title = `${SITE_TITLE}${SITE_TAGLINE ? ' — ' + SITE_TAGLINE : ''} | ${SITE_NAME_EN}`;
   const desc = `${SITE_TITLE} (${SITE_NAME_EN})${SITE_TAGLINE ? ' — ' + SITE_TAGLINE + '।' : '।'} রাজনীতি, খেলা, প্রযুক্তি, স্বাস্থ্য ও জেলার সর্বশেষ বাংলা সংবাদ।`;
@@ -612,7 +612,7 @@ function homePageHtml(){
 </head>
 <body>
   ${siteHeader()}
-  <main class="wrap home-grid" style="max-width:1240px;padding:24px 20px 60px;">
+  <main class="wrap home-grid" style="max-width:1400px;padding:24px 20px 60px;">
     ${promoBox()}
     <div style="min-width:0;">
       ${hero ? articleCard(hero, true) : '<p>এখনো কোনো সংবাদ প্রকাশিত হয়নি।</p>'}
