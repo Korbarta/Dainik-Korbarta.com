@@ -206,6 +206,7 @@ function siteSchema(){
 
 // [পরিবর্তিত] সম্পূর্ণ Open Graph, Twitter কার্ড, Schema ও আপডেটের সময় যোগ করা হয়েছে
 // [পরিবর্তিত] হোমপেজ এখন ৩ কলাম: বামে বিজ্ঞাপন বক্স, মাঝে খবর, ডানে সর্বশেষ
+// [নতুন] প্রধান খবর ও খবরের পাতার ছবি এখন সবসময় একই মাপে (১৬:৯) দেখাবে
 function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso){
   const img = ogImage ? absUrl(ogImage) : `${SITE_URL}/logo.png`;
   const updated = updatedIso || BUILD_TIME.toISOString();
@@ -262,6 +263,8 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .news-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; }
     @media (max-width: 900px) { .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
     @media (max-width: 520px) { .news-grid { grid-template-columns:minmax(0,1fr); } }
+    .hero-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center; display:block; border-radius:8px; margin-bottom:12px; background:#f0f4f2; }
+    .article-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center; display:block; border-radius:8px; margin-bottom:16px; background:#f0f4f2; }
     .news-card { display:flex; flex-direction:column; text-decoration:none; color:inherit; background:#fff; border:1px solid #e6e6e6; border-radius:8px; overflow:hidden; }
     .news-card:hover { border-color:#1a5276; }
     .news-card .card-img { width:100%; aspect-ratio:16/10; object-fit:cover; display:block; background:#f0f4f2; }
@@ -460,7 +463,7 @@ function articlePageHtml(a, urlPath){
   ${siteHeader()}
   <main class="wrap" style="max-width:760px;padding:36px 20px 60px;">
     <p><a href="/">← হোমপেজে ফিরুন</a></p>
-    ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" style="margin-bottom:16px;width:100%;">` : ''}
+    ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" class="article-img">` : ''}
     <span class="cat-tag">${escapeHtml(a.category)}</span>
     <h1 style="font-size:clamp(1.5rem,4vw,2.1rem);margin:10px 0 12px;line-height:1.35;">${escapeHtml(a.title)}</h1>
     <div class="meta"><strong style="color:${DATE_COLOR};font-weight:700;">${formatDateBn(d)}</strong>${a.reporter ? ' | প্রতিবেদক: ' + escapeHtml(a.reporter) : ''}</div>
@@ -520,7 +523,7 @@ function articleCard(a, big){
   const d = new Date(a.date);
   if (big){
     return `<a href="${link}" style="display:block;text-decoration:none;color:inherit;">
-      ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" style="width:100%;border-radius:8px;margin-bottom:12px;">` : ''}
+      ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" class="hero-img">` : ''}
       <span class="cat-tag">${escapeHtml(a.category)}</span>
       <h2 style="font-size:1.6rem;margin:8px 0 6px;line-height:1.4;">${escapeHtml(a.title)}</h2>
       <div class="meta">${formatDateBn(d)}</div>
