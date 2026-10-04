@@ -147,8 +147,11 @@ const settings = readJson('content/settings.json');
 const articles = articlesData.articles || [];
 
 if (fs.existsSync('article')) fs.rmSync('article', { recursive: true, force: true });
+// [নতুন] ছোট লিংকের ফোল্ডার (/news/) প্রতিবার নতুন করে তৈরি হবে
+if (fs.existsSync('news')) fs.rmSync('news', { recursive: true, force: true });
 if (fs.existsSync('category')) fs.rmSync('category', { recursive: true, force: true });
 fs.mkdirSync('article');
+fs.mkdirSync('news');
 
 const urls = [`${SITE_URL}/`];
 // [নতুন] সাইটম্যাপে প্রতিটি পাতার শেষ আপডেটের সময় (lastmod)
@@ -202,7 +205,7 @@ function siteSchema(){
 }
 
 // [পরিবর্তিত] সম্পূর্ণ Open Graph, Twitter কার্ড, Schema ও আপডেটের সময় যোগ করা হয়েছে
-// [নতুন] সংবাদ row আকারে দেখানোর ও মোবাইলে সাইডবার নিচে নামানোর CSS যোগ করা হয়েছে
+// [পরিবর্তিত] হোমপেজ এখন ৩ কলাম: বামে বিজ্ঞাপন বক্স, মাঝে খবর, ডানে সর্বশেষ
 function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso){
   const img = ogImage ? absUrl(ogImage) : `${SITE_URL}/logo.png`;
   const updated = updatedIso || BUILD_TIME.toISOString();
@@ -230,8 +233,23 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
   <style>
     @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     .breaking-track { display:inline-block; white-space:nowrap; animation: marquee 25s linear infinite; }
-    .home-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; }
-    @media (max-width: 800px) { .home-grid { grid-template-columns:minmax(0,1fr); } }
+    .home-grid { display:grid; grid-template-columns:190px minmax(0,1fr) 300px; gap:24px; align-items:start; }
+    .home-grid .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
+    @media (max-width: 1050px) {
+      .home-grid { grid-template-columns:190px minmax(0,1fr); }
+      .home-grid > .sidebar-col { grid-column:1 / -1; }
+    }
+    @media (max-width: 800px) {
+      .home-grid { grid-template-columns:minmax(0,1fr); }
+      .promo-box { position:static; min-height:0; }
+    }
+    @media (max-width: 520px) { .home-grid .news-grid { grid-template-columns:minmax(0,1fr); } }
+    .promo-box { position:sticky; top:12px; width:100%; min-height:288px; box-sizing:border-box; background:#EAF3DE; border:2px solid #3B6D11; border-radius:8px; padding:14px 10px; text-align:center; display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
+    .promo-box .promo-label { background:#3B6D11; color:#fff; font-size:12px; padding:4px; border-radius:4px; }
+    .promo-box .promo-main { margin:0; font-size:15px; font-weight:bold; line-height:1.55; color:#27500A; }
+    .promo-box .promo-ad { margin:0; font-size:15px; font-weight:bold; line-height:1.55; color:#993C1D; }
+    .promo-box .promo-contact { border-top:1px dashed #3B6D11; padding-top:8px; font-size:12px; line-height:1.7; color:#27500A; word-break:break-all; }
+    .promo-box .promo-contact a { color:#27500A; text-decoration:none; }
     .news-row { display:flex; gap:14px; align-items:flex-start; text-decoration:none; color:inherit; padding:14px 0; border-bottom:1px solid #eee; }
     .news-row .row-img { width:150px; height:100px; object-fit:cover; border-radius:6px; flex-shrink:0; }
     .news-row .row-text { flex:1; min-width:0; }
@@ -397,11 +415,36 @@ function slugOf(article){
   return slugMap.find(s => s.index === idx).slug;
 }
 
-function articlePageHtml(a, slug){
+// [নতুন] ছোট লিংক: প্রকাশের তারিখ ও সময় থেকে একটি স্থায়ী নম্বর (যেমন /news/2610041230/)
+// নতুন খবর যোগ বা পুরোনো খবর মুছলেও অন্য খবরের লিংক বদলাবে না
+function pad2(n){ return String(n).padStart(2, '0'); }
+function baseNewsId(a, i){
+  const d = new Date(a.date);
+  if (isNaN(d.getTime())) return 'n' + i;
+  return String(d.getUTCFullYear()).slice(2) + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate()) +
+    pad2(d.getUTCHours()) + pad2(d.getUTCMinutes());
+}
+const newsIds = [];
+{
+  const used = new Set();
+  articles.forEach((a, i) => {
+    const base = baseNewsId(a, i);
+    let id = base;
+    let k = 2;
+    while (used.has(id)) { id = `${base}-${k}`; k++; }
+    used.add(id);
+    newsIds[i] = id;
+  });
+}
+function urlOf(article){
+  return `/news/${newsIds[articles.indexOf(article)]}/`;
+}
+
+function articlePageHtml(a, urlPath){
   const d = new Date(a.date);
   const title = `${escapeHtml(a.title)} - ${escapeHtml(SITE_TITLE)}`;
   const desc = escapeHtml((a.body || '').replace(/\n/g,' ').slice(0, 150));
-  const canonical = `${SITE_URL}/article/${slug}/`;
+  const canonical = `${SITE_URL}${urlPath}`;
 
   return `<!DOCTYPE html>
 <html lang="bn">
@@ -429,13 +472,36 @@ function articlePageHtml(a, slug){
 </html>`;
 }
 
+// [নতুন] পুরোনো লম্বা লিংকে (/article/...) কেউ এলে স্বয়ংক্রিয়ভাবে নতুন ছোট লিংকে পাঠানো হবে
+function redirectPageHtml(urlPath){
+  const full = `${SITE_URL}${urlPath}`;
+  return `<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>${escapeHtml(SITE_TITLE)}</title>
+  <link rel="canonical" href="${full}">
+  <meta http-equiv="refresh" content="0; url=${urlPath}">
+  <script>location.replace(${JSON.stringify(urlPath)});</script>
+</head>
+<body>
+  <p>এই খবরটি নতুন ঠিকানায় আছে: <a href="${urlPath}">${full}</a></p>
+</body>
+</html>`;
+}
+
 articles.forEach((a) => {
-  const slug = slugOf(a);
-  const dir = path.join('article', slug);
+  const urlPath = urlOf(a);
+  const id = newsIds[articles.indexOf(a)];
+  const dir = path.join('news', id);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'index.html'), articlePageHtml(a, slug));
-  urls.push(`${SITE_URL}/article/${slug}/`);
-  lastmodMap[`${SITE_URL}/article/${slug}/`] = safeIso(a.updated || a.date, BUILD_TIME);
+  fs.writeFileSync(path.join(dir, 'index.html'), articlePageHtml(a, urlPath));
+  urls.push(`${SITE_URL}${urlPath}`);
+  lastmodMap[`${SITE_URL}${urlPath}`] = safeIso(a.updated || a.date, BUILD_TIME);
+
+  const oldDir = path.join('article', slugOf(a));
+  fs.mkdirSync(oldDir, { recursive: true });
+  fs.writeFileSync(path.join(oldDir, 'index.html'), redirectPageHtml(urlPath));
 });
 
 fs.mkdirSync('content', { recursive: true });
@@ -450,10 +516,10 @@ function shortExcerpt(a){
 
 // [পরিবর্তিত] ছোট সংবাদগুলো এখন row আকারে: বামে ছবি, ডানে বিভাগ, শিরোনাম, সংক্ষিপ্তসার ও তারিখ
 function articleCard(a, big){
-  const slug = slugOf(a);
+  const link = urlOf(a);
   const d = new Date(a.date);
   if (big){
-    return `<a href="/article/${slug}/" style="display:block;text-decoration:none;color:inherit;">
+    return `<a href="${link}" style="display:block;text-decoration:none;color:inherit;">
       ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" style="width:100%;border-radius:8px;margin-bottom:12px;">` : ''}
       <span class="cat-tag">${escapeHtml(a.category)}</span>
       <h2 style="font-size:1.6rem;margin:8px 0 6px;line-height:1.4;">${escapeHtml(a.title)}</h2>
@@ -461,7 +527,7 @@ function articleCard(a, big){
     </a>`;
   }
   const ex = shortExcerpt(a);
-  return `<a href="/article/${slug}/" class="news-row">
+  return `<a href="${link}" class="news-row">
     ${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" class="row-img">` : ''}
     <div class="row-text">
       <span class="cat-tag">${escapeHtml(a.category)}</span>
@@ -474,13 +540,13 @@ function articleCard(a, big){
 
 // [নতুন] পাশাপাশি কার্ডের জন্য: ওপরে ছবি (না থাকলে লোগো), নিচে বিভাগ, শিরোনাম, সংক্ষিপ্তসার ও তারিখ
 function articleGridCard(a){
-  const slug = slugOf(a);
+  const link = urlOf(a);
   const d = new Date(a.date);
   const ex = shortExcerpt(a);
   const pic = a.image
     ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" class="card-img" loading="lazy">`
     : `<div class="card-noimg"><img src="/logo.png" alt=""></div>`;
-  return `<a href="/article/${slug}/" class="news-card">
+  return `<a href="${link}" class="news-card">
     ${pic}
     <div class="card-body">
       <span class="cat-tag">${escapeHtml(a.category)}</span>
@@ -501,12 +567,27 @@ function adBanner(){
   </div>`;
 }
 
+// [নতুন] হোমপেজের বাম পাশের বিজ্ঞাপন বক্স (প্রায় ২×৩ ইঞ্চি)
+function promoBox(){
+  return `<aside class="promo-col">
+    <div class="promo-box">
+      <div class="promo-label">বিজ্ঞাপন</div>
+      <p class="promo-main">অনলাইন নিউজ পোর্টাল দৈনিক করবার্তা'য় আপনার এলাকার খবর দেখুন</p>
+      <p class="promo-ad">আপনার পণ্যের বিজ্ঞাপন দিন</p>
+      <div class="promo-contact">
+        যোগাযোগ<br>
+        <a href="tel:+8801860317788">০১৮৬০৩১৭৭৮৮</a><br>
+        <a href="mailto:dainikkorbarta@gmail.com">dainikkorbarta@gmail.com</a>
+      </div>
+    </div>
+  </aside>`;
+}
+
 function latestSidebar(list){
   const items = list.slice(0, 8).map(a => {
-    const slug = slugOf(a);
-    return `<a href="/article/${slug}/" style="display:block;text-decoration:none;color:#222;padding:10px 0;border-bottom:1px solid #eee;font-size:14px;line-height:1.5;">${escapeHtml(a.title)}</a>`;
+    return `<a href="${urlOf(a)}" style="display:block;text-decoration:none;color:#222;padding:10px 0;border-bottom:1px solid #eee;font-size:14px;line-height:1.5;">${escapeHtml(a.title)}</a>`;
   }).join('');
-  return `<aside style="background:#fafafa;border-radius:8px;padding:16px;">
+  return `<aside class="sidebar-col" style="background:#fafafa;border-radius:8px;padding:16px;">
     ${adBanner()}
     <h3 style="margin:0 0 10px;font-size:1.1rem;border-bottom:2px solid #1a5276;padding-bottom:8px;">সর্বশেষ</h3>
     ${items || '<p>কোনো সংবাদ নেই।</p>'}
@@ -514,7 +595,7 @@ function latestSidebar(list){
 }
 
 // [পরিবর্তিত] হোমপেজের টাইটেল ও ডেসক্রিপশনে কমন কিওয়ার্ড আছে, ডেসক্রিপশন ১৬০ অক্ষরের মধ্যে (SEO)
-// [পরিবর্তিত] সংবাদ এখন পাশাপাশি কার্ডে (কম্পিউটারে ৩টি, ট্যাবে ২টি, মোবাইলে ১টি); মোবাইলে সাইডবার নিচে যায়
+// [পরিবর্তিত] বামে বিজ্ঞাপন বক্স যোগ হয়েছে; মাঝে খবর পাশাপাশি ২টি করে; মোবাইলে সব একটার নিচে আরেকটা
 function homePageHtml(){
   const title = `${SITE_TITLE}${SITE_TAGLINE ? ' — ' + SITE_TAGLINE : ''} | ${SITE_NAME_EN}`;
   const desc = `${SITE_TITLE} (${SITE_NAME_EN})${SITE_TAGLINE ? ' — ' + SITE_TAGLINE + '।' : '।'} রাজনীতি, খেলা, প্রযুক্তি, স্বাস্থ্য ও জেলার সর্বশেষ বাংলা সংবাদ।`;
@@ -531,7 +612,8 @@ function homePageHtml(){
 </head>
 <body>
   ${siteHeader()}
-  <main class="wrap home-grid" style="max-width:1100px;padding:24px 20px 60px;">
+  <main class="wrap home-grid" style="max-width:1240px;padding:24px 20px 60px;">
+    ${promoBox()}
     <div style="min-width:0;">
       ${hero ? articleCard(hero, true) : '<p>এখনো কোনো সংবাদ প্রকাশিত হয়নি।</p>'}
       <div class="news-grid" style="margin-top:20px;">${rowCards}</div>
