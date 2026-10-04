@@ -207,6 +207,7 @@ function siteSchema(){
 // [পরিবর্তিত] সম্পূর্ণ Open Graph, Twitter কার্ড, Schema ও আপডেটের সময় যোগ করা হয়েছে
 // [পরিবর্তিত] হোমপেজ এখন ৩ কলাম: বামে বিজ্ঞাপন বক্স, মাঝে খবর, ডানে সর্বশেষ
 // [নতুন] প্রধান খবর ও খবরের পাতার ছবি এখন সবসময় একই মাপে (১৬:৯) দেখাবে
+// [পরিবর্তিত] ছবি কাটার সময় ওপরের অংশ রাখা হয় — যাতে মানুষের মাথা/মুখ কেটে না যায়
 function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso){
   const img = ogImage ? absUrl(ogImage) : `${SITE_URL}/logo.png`;
   const updated = updatedIso || BUILD_TIME.toISOString();
@@ -252,7 +253,7 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .promo-box .promo-contact { border-top:1px dashed #3B6D11; padding-top:8px; font-size:12px; line-height:1.7; color:#27500A; word-break:break-all; }
     .promo-box .promo-contact a { color:#27500A; text-decoration:none; }
     .news-row { display:flex; gap:14px; align-items:flex-start; text-decoration:none; color:inherit; padding:14px 0; border-bottom:1px solid #eee; }
-    .news-row .row-img { width:150px; height:100px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+    .news-row .row-img { width:150px; height:100px; object-fit:cover; object-position:center top; border-radius:6px; flex-shrink:0; }
     .news-row .row-text { flex:1; min-width:0; }
     .news-row .row-title { font-size:1.05rem; margin:4px 0; line-height:1.45; }
     .news-row .row-excerpt { font-size:14px; color:#555; margin:4px 0 6px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -263,11 +264,11 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .news-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; }
     @media (max-width: 900px) { .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
     @media (max-width: 520px) { .news-grid { grid-template-columns:minmax(0,1fr); } }
-    .hero-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center; display:block; border-radius:8px; margin-bottom:12px; background:#f0f4f2; }
-    .article-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center; display:block; border-radius:8px; margin-bottom:16px; background:#f0f4f2; }
+    .hero-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center top; display:block; border-radius:8px; margin-bottom:12px; background:#f0f4f2; }
+    .article-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center top; display:block; border-radius:8px; margin-bottom:16px; background:#f0f4f2; }
     .news-card { display:flex; flex-direction:column; text-decoration:none; color:inherit; background:#fff; border:1px solid #e6e6e6; border-radius:8px; overflow:hidden; }
     .news-card:hover { border-color:#1a5276; }
-    .news-card .card-img { width:100%; aspect-ratio:16/10; object-fit:cover; display:block; background:#f0f4f2; }
+    .news-card .card-img { width:100%; aspect-ratio:16/10; object-fit:cover; object-position:center top; display:block; background:#f0f4f2; }
     .news-card .card-noimg { width:100%; aspect-ratio:16/10; display:flex; align-items:center; justify-content:center; background:#eef4f0; }
     .news-card .card-noimg img { width:64px; height:64px; border-radius:50%; opacity:.85; }
     .news-card .card-body { padding:10px 12px 12px; display:flex; flex-direction:column; flex:1; }
