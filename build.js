@@ -25,6 +25,11 @@ const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও
 // [নতুন] খবরের পাতার তারিখের রং (হালকা সবুজ, গাঢ় নয়)
 const DATE_COLOR = '#43A047';
 
+// [নতুন] twistcircle ব্যানার — ছবি GitHub রিপোর মূল জায়গায় 'twistcircle-banner.png' নামে থাকবে
+// ক্লিক করলে আপাতত দৈনিক করবার্তার ফেসবুক পেজে যাবে; অ্যাপ Play Store-এ এলে শুধু এই লিংকটা বদলালেই হবে
+const TWISTCIRCLE_BANNER_IMG = '/twistcircle-banner.png';
+const TWISTCIRCLE_LINK = 'https://www.facebook.com/share/1JY87mNj5v/';
+
 function toBnNumber(n){
   return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
 }
@@ -237,16 +242,18 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .breaking-track { display:inline-block; white-space:nowrap; animation: marquee 25s linear infinite; }
     .home-grid { display:grid; grid-template-columns:190px minmax(0,1fr) 300px; gap:24px; align-items:start; }
     .home-grid .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .promo-col { position:sticky; top:12px; }
     @media (max-width: 1050px) {
       .home-grid { grid-template-columns:190px minmax(0,1fr); }
       .home-grid > .sidebar-col { grid-column:1 / -1; }
     }
     @media (max-width: 800px) {
       .home-grid { grid-template-columns:minmax(0,1fr); }
-      .promo-box { position:static; min-height:0; }
+      .promo-col { position:static; }
+      .promo-box { min-height:0; }
     }
     @media (max-width: 520px) { .home-grid .news-grid { grid-template-columns:minmax(0,1fr); } }
-    .promo-box { position:sticky; top:12px; width:100%; min-height:288px; box-sizing:border-box; background:#EAF3DE; border:2px solid #3B6D11; border-radius:8px; padding:14px 10px; text-align:center; display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
+    .promo-box { width:100%; min-height:288px; box-sizing:border-box; background:#EAF3DE; border:2px solid #3B6D11; border-radius:8px; padding:14px 10px; text-align:center; display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
     .promo-box .promo-label { background:#3B6D11; color:#fff; font-size:12px; padding:4px; border-radius:4px; }
     .promo-box .promo-main { margin:0; font-size:15px; font-weight:bold; line-height:1.55; color:#27500A; }
     .promo-box .promo-ad { margin:0; font-size:15px; font-weight:bold; line-height:1.55; color:#993C1D; }
@@ -275,6 +282,15 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .news-card .card-title { font-size:1rem; margin:4px 0 6px; line-height:1.45; }
     .news-card .card-excerpt { font-size:13.5px; color:#555; margin:0 0 8px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
     .news-card .meta { margin-top:auto; font-size:12px; }
+    .related-news { margin-top:36px; padding-top:18px; border-top:2px solid #1a5276; }
+    .related-news h2 { margin:0 0 14px; font-size:1.25rem; color:#1a5276; }
+    .related-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; }
+    @media (max-width: 520px) { .related-grid { grid-template-columns:minmax(0,1fr); } }
+    .tc-banner { display:block; margin:0 auto; text-align:center; }
+    .tc-banner img { display:block; width:100%; height:auto; border-radius:10px; }
+    .tc-banner-home { margin-top:16px; }
+    .tc-banner-article { max-width:360px; margin:32px auto 0; }
+    @media (max-width: 800px) { .tc-banner-home { max-width:320px; } }
   </style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MX0Q3361L2"></script>
@@ -404,6 +420,7 @@ function siteFooter(){
       <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;">
         <a href="/about-us/" style="color:#fff;">আমাদের সম্পর্কে</a>
         <a href="/contact-us/" style="color:#fff;">যোগাযোগ</a>
+        <a href="/editorial-policy/" style="color:#fff;">সম্পাদকীয় নীতি</a>
         <a href="/privacy-policy/" style="color:#fff;">গোপনীয়তা নীতি</a>
         <a href="/terms-and-conditions/" style="color:#fff;">শর্তাবলী</a>
       </div>
@@ -469,11 +486,37 @@ function articlePageHtml(a, urlPath){
     <h1 style="font-size:clamp(1.5rem,4vw,2.1rem);margin:10px 0 12px;line-height:1.35;">${escapeHtml(a.title)}</h1>
     <div class="meta"><strong style="color:${DATE_COLOR};font-weight:700;">${formatDateBn(d)}</strong>${a.reporter ? ' | প্রতিবেদক: ' + escapeHtml(a.reporter) : ''}</div>
     <div class="body-text" style="margin-top:20px;">${bodyToHtml(a.body)}</div>
+    ${relatedNews(a)}
+    ${twistcircleBanner('article')}
     ${adBanner()}
   </main>
   ${siteFooter()}
 </body>
 </html>`;
+}
+
+// [নতুন] সম্পর্কিত খবর: প্রথমে একই বিভাগের সর্বশেষ খবর, কম পড়লে অন্য সর্বশেষ খবর দিয়ে পূরণ (সর্বোচ্চ ৪টি)
+function relatedNews(current, max){
+  max = max || 4;
+  const others = sortedArticles.filter(x => x !== current);
+  const sameCat = current.category ? others.filter(x => x.category === current.category) : [];
+  const picked = sameCat.slice(0, max);
+  for (const x of others){
+    if (picked.length >= max) break;
+    if (!picked.includes(x)) picked.push(x);
+  }
+  if (!picked.length) return '';
+  return `<section class="related-news">
+    <h2>সম্পর্কিত খবর</h2>
+    <div class="related-grid">${picked.map(x => articleGridCard(x)).join('')}</div>
+  </section>`;
+}
+
+// [নতুন] twistcircle ব্যানার (হোমপেজে বাম পাশে, খবরের পাতায় নিচে)
+function twistcircleBanner(place){
+  return `<a href="${TWISTCIRCLE_LINK}" target="_blank" rel="noopener" class="tc-banner tc-banner-${place}" aria-label="twistcircle — শীঘ্রই আসছে">
+    <img src="${TWISTCIRCLE_BANNER_IMG}" alt="twistcircle — বট-মুক্ত সামাজিক যোগাযোগের মাধ্যম, শীঘ্রই আসছে" width="1200" height="1200" loading="lazy">
+  </a>`;
 }
 
 // [নতুন] পুরোনো লম্বা লিংকে (/article/...) কেউ এলে স্বয়ংক্রিয়ভাবে নতুন ছোট লিংকে পাঠানো হবে
@@ -584,6 +627,7 @@ function promoBox(){
         <a href="mailto:dainikkorbarta@gmail.com">dainikkorbarta@gmail.com</a>
       </div>
     </div>
+    ${twistcircleBanner('home')}
   </aside>`;
 }
 
@@ -697,6 +741,62 @@ const staticPages = [
         <p><strong>মোঃ আমিনুল ইসলাম</strong><br>সম্পাদক</p>
         <p>মোবাইল নম্বর: ০১৮৬০৩১৭৭৮৮</p>
         <p>ইমেইল: <a href="mailto:dainikkorbarta@gmail.com">dainikkorbarta@gmail.com</a></p>
+      </div>`
+  },
+  {
+    // [নতুন] সম্পাদকীয় নীতি
+    slug: 'editorial-policy',
+    title: `সম্পাদকীয় নীতি - ${SITE_TITLE}`,
+    desc: `${SITE_TITLE}-এর সম্পাদকীয় নীতি: বস্তুনিষ্ঠতা, তথ্য যাচাই, সংশোধন, গোপনীয়তা ও সাংবাদিকতার নৈতিকতা`,
+    body: `
+      <h1 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">সম্পাদকীয় নীতি</h1>
+      <div class="body-text" style="margin-top:16px;">
+        <p>${escapeHtml(SITE_TITLE)} একটি স্বাধীন বাংলা অনলাইন সংবাদমাধ্যম। সত্য, বস্তুনিষ্ঠ ও দায়িত্বশীল সাংবাদিকতার মাধ্যমে পাঠকের আস্থা অর্জনই আমাদের মূল লক্ষ্য। আমাদের প্রতিটি সংবাদ, ছবি, ভিডিও ও লেখা নিচের নীতিমালা অনুসরণ করে প্রকাশিত হয়।</p>
+
+        <h2>১. বস্তুনিষ্ঠতা ও নিরপেক্ষতা</h2>
+        <p>আমরা কোনো রাজনৈতিক দল, গোষ্ঠী, প্রতিষ্ঠান বা ব্যক্তির পক্ষে বা বিপক্ষে পক্ষপাতমূলক সংবাদ প্রকাশ করি না। বিতর্কিত বা অভিযোগমূলক বিষয়ে সংশ্লিষ্ট সব পক্ষের বক্তব্য নেওয়ার চেষ্টা করা হয়। কোনো পক্ষ বক্তব্য দিতে অস্বীকৃতি জানালে বা যোগাযোগ সম্ভব না হলে তা সংবাদে উল্লেখ করা হয়।</p>
+
+        <h2>২. তথ্য যাচাই ও সূত্র</h2>
+        <p>প্রকাশের আগে প্রতিটি তথ্য যথাসম্ভব একাধিক নির্ভরযোগ্য সূত্র থেকে যাচাই করা হয়। প্রত্যক্ষদর্শী, সংশ্লিষ্ট কর্তৃপক্ষ, সরকারি নথি ও প্রামাণ্য দলিলকে অগ্রাধিকার দেওয়া হয়। সামাজিক যোগাযোগমাধ্যমে ছড়িয়ে পড়া তথ্য, ছবি বা ভিডিও যাচাই ছাড়া সংবাদ হিসেবে প্রকাশ করা হয় না। অন্য সংবাদমাধ্যমের তথ্য ব্যবহার করলে সূত্র উল্লেখ করা হয়।</p>
+
+        <h2>৩. সূত্রের গোপনীয়তা</h2>
+        <p>জনস্বার্থে তথ্য প্রদানকারী কোনো সূত্র পরিচয় গোপন রাখতে চাইলে আমরা তা রক্ষা করি। তবে বেনামি সূত্রের তথ্য অন্য উপায়ে যাচাই না করে প্রকাশ করা হয় না, এবং বেনামি সূত্র ব্যবহার করে কারও বিরুদ্ধে ব্যক্তিগত আক্রমণ করা হয় না।</p>
+
+        <h2>৪. ভুল সংশোধন নীতি</h2>
+        <p>সতর্কতা সত্ত্বেও কোনো সংবাদে ভুল তথ্য প্রকাশিত হলে, ভুল চিহ্নিত হওয়ামাত্র তা দ্রুত সংশোধন করা হয়। গুরুত্বপূর্ণ সংশোধনের ক্ষেত্রে সংবাদের সঙ্গে সংশোধনীর বিষয়টি স্পষ্টভাবে উল্লেখ করা হয়। কোনো সংবাদ নিয়ে সংশ্লিষ্ট ব্যক্তি বা প্রতিষ্ঠানের আপত্তি থাকলে তাদের প্রতিবাদ বা ব্যাখ্যা প্রকাশের সুযোগ দেওয়া হয়।</p>
+
+        <h2>৫. ব্যক্তিগত গোপনীয়তা ও মানবিক মর্যাদা</h2>
+        <p>জনস্বার্থের প্রয়োজন ছাড়া কারও ব্যক্তিগত জীবনে অনুপ্রবেশ করা হয় না। যৌন নির্যাতনের শিকার ব্যক্তি এবং শিশুদের (১৮ বছরের কম বয়সী) নাম, ছবি, ঠিকানা বা পরিচয় প্রকাশ পায় এমন কোনো তথ্য প্রকাশ করা হয় না। আদালতে দোষী প্রমাণিত না হওয়া পর্যন্ত অভিযুক্ত ব্যক্তিকে অপরাধী হিসেবে উপস্থাপন করা হয় না। দুর্ঘটনা, মৃত্যু ও শোকের সংবাদ পরিবেশনে সংবেদনশীলতা বজায় রাখা হয়।</p>
+
+        <h2>৬. ছবি ও ভিডিও</h2>
+        <p>বিভ্রান্তি সৃষ্টি করতে পারে এমনভাবে ছবি বা ভিডিও সম্পাদনা বা বিকৃত করা হয় না। অতিরিক্ত রক্তাক্ত, বীভৎস বা পাঠকের জন্য বিচলিতকর দৃশ্য প্রকাশ থেকে বিরত থাকা হয়। পুরোনো বা প্রতীকী ছবি ব্যবহার করলে তা স্পষ্টভাবে উল্লেখ করা হয়।</p>
+
+        <h2>৭. সংবাদ ও মতামতের পার্থক্য</h2>
+        <p>সংবাদ ও মতামত আলাদাভাবে প্রকাশ করা হয়। "মতামত" বিভাগে প্রকাশিত লেখা সংশ্লিষ্ট লেখকের নিজস্ব মত; তা ${escapeHtml(SITE_TITLE)}-এর অবস্থান হিসেবে গণ্য হবে না। শিরোনাম অবশ্যই সংবাদের মূল বিষয়ের সঙ্গে সঙ্গতিপূর্ণ হবে; পাঠক টানতে বিভ্রান্তিকর বা অতিরঞ্জিত শিরোনাম (ক্লিকবেইট) ব্যবহার করা হয় না।</p>
+
+        <h2>৮. বিজ্ঞাপন ও সংবাদের স্বাধীনতা</h2>
+        <p>বিজ্ঞাপন ও সংবাদ সম্পূর্ণ আলাদা রাখা হয়। প্রতিটি বিজ্ঞাপন "বিজ্ঞাপন" হিসেবে স্পষ্টভাবে চিহ্নিত থাকে। কোনো বিজ্ঞাপনদাতা বা পৃষ্ঠপোষক আমাদের সংবাদের বিষয়বস্তু বা সম্পাদকীয় সিদ্ধান্তে প্রভাব খাটাতে পারেন না। অর্থের বিনিময়ে প্রকাশিত কোনো কনটেন্ট সংবাদ হিসেবে উপস্থাপন করা হয় না।</p>
+
+        <h2>৯. স্বার্থের সংঘাত</h2>
+        <p>সংবাদ সংগ্রহ বা প্রকাশের বিনিময়ে আমাদের কোনো প্রতিবেদক বা সম্পাদক কারও কাছ থেকে অর্থ, উপহার বা সুবিধা গ্রহণ করেন না। কোনো সংবাদের সঙ্গে প্রতিষ্ঠান বা সংশ্লিষ্ট কারও ব্যক্তিগত বা ব্যবসায়িক স্বার্থ জড়িত থাকলে তা পাঠকের কাছে প্রকাশ করা হয়।</p>
+
+        <h2>১০. পাঠক সংবাদ</h2>
+        <p>পাঠকদের পাঠানো সংবাদ, ছবি ও লেখা "পাঠক সংবাদ" বিভাগে প্রকাশ করা হয়। প্রকাশের আগে তা যাচাই ও সম্পাদনা করা হয়, এবং প্রয়োজনে প্রকাশ না করার অধিকার সম্পাদক সংরক্ষণ করেন। পাঠানো তথ্যের সত্যতার দায় প্রেরকের ওপরও বর্তায়।</p>
+
+        <h2>১১. আইন, সমাজ ও নৈতিকতা</h2>
+        <p>আমরা বাংলাদেশের সংবিধান ও প্রচলিত আইন মেনে চলি এবং বাংলাদেশ প্রেস কাউন্সিল প্রণীত সাংবাদিকতার আচরণবিধি অনুসরণের চেষ্টা করি। ধর্মীয়, জাতিগত বা সাম্প্রদায়িক বিদ্বেষ ছড়ায়, সহিংসতায় উসকানি দেয়, গুজব ছড়ায় বা জাতীয় নিরাপত্তা ও জনশৃঙ্খলা বিঘ্নিত করে এমন কোনো কনটেন্ট প্রকাশ করা হয় না। আত্মহত্যার সংবাদে পদ্ধতির বিস্তারিত বর্ণনা দেওয়া হয় না।</p>
+
+        <h2>১২. কপিরাইট</h2>
+        <p>অন্যের লেখা, ছবি বা ভিডিও অনুমতি ও সূত্র উল্লেখ ছাড়া ব্যবহার করা হয় না। ${escapeHtml(SITE_TITLE)}-এ প্রকাশিত মৌলিক কনটেন্ট লিখিত অনুমতি ছাড়া পুনঃপ্রকাশ করা যাবে না; তবে সূত্র উল্লেখ করে সংবাদের লিংক শেয়ার করা যাবে।</p>
+
+        <h2>১৩. অভিযোগ ও যোগাযোগ</h2>
+        <p>কোনো সংবাদ সম্পর্কে অভিযোগ, সংশোধনের অনুরোধ বা প্রতিবাদ জানাতে সরাসরি সম্পাদকের সঙ্গে যোগাযোগ করুন। প্রতিটি অভিযোগ গুরুত্বের সঙ্গে বিবেচনা করে যথাসম্ভব দ্রুত ব্যবস্থা নেওয়া হয়।</p>
+        <p><strong>মোঃ আমিনুল ইসলাম</strong>, সম্পাদক<br>
+        মোবাইল: <a href="tel:+8801860317788">০১৮৬০৩১৭৭৮৮</a><br>
+        ইমেইল: <a href="mailto:dainikkorbarta@gmail.com">dainikkorbarta@gmail.com</a></p>
+
+        <h2>নীতিমালার পরিবর্তন</h2>
+        <p>প্রয়োজনে ${escapeHtml(SITE_TITLE)} কর্তৃপক্ষ এই সম্পাদকীয় নীতি হালনাগাদ করতে পারে। যেকোনো পরিবর্তন এই পাতায় প্রকাশ করা হবে।</p>
       </div>`
   },
   {
