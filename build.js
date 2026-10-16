@@ -423,6 +423,7 @@ function siteFooter(){
         <a href="/editorial-policy/" style="color:#fff;">সম্পাদকীয় নীতি</a>
         <a href="/privacy-policy/" style="color:#fff;">গোপনীয়তা নীতি</a>
         <a href="/terms-and-conditions/" style="color:#fff;">শর্তাবলী</a>
+        <a href="/advertise/" style="color:#fff;">বিজ্ঞাপন দিন</a>
       </div>
     </div>
   </footer>`;
@@ -620,7 +621,7 @@ function promoBox(){
     <div class="promo-box">
       <div class="promo-label">বিজ্ঞাপন</div>
       <p class="promo-main">অনলাইন নিউজ পোর্টাল দৈনিক করবার্তা'য় আপনার এলাকার খবর দেখুন</p>
-      <p class="promo-ad">আপনার পণ্যের বিজ্ঞাপন দিন</p>
+      <p class="promo-ad"><a href="/advertise/" style="color:inherit;text-decoration:underline;">আপনার পণ্যের বিজ্ঞাপন দিন</a></p>
       <div class="promo-contact">
         যোগাযোগ<br>
         <a href="tel:+8801860317788">০১৮৬০৩১৭৭৮৮</a><br>
@@ -811,6 +812,61 @@ const staticPages = [
         <p><strong>কুকিজ:</strong> ওয়েবসাইটের কার্যকারিতা উন্নত করতে কুকিজ ব্যবহার করা হতে পারে।</p>
         <p><strong>তৃতীয় পক্ষ:</strong> আমাদের সাইটে ব্যবহৃত কোনো তৃতীয় পক্ষের বিজ্ঞাপন বা সেবার গোপনীয়তা নীতি তাদের নিজস্ব নিয়ম অনুযায়ী পরিচালিত হয়।</p>
         <p>এই নীতিতে যেকোনো পরিবর্তন এই পাতায় প্রকাশ করা হবে।</p>
+      </div>`
+  },
+  {
+    // [নতুন] বিজ্ঞাপন দিন পেজ
+    slug: 'advertise',
+    title: `বিজ্ঞাপন দিন - ${SITE_TITLE}`,
+    desc: `${SITE_TITLE}-এ বিজ্ঞাপন দিন: বিজ্ঞাপনের জায়গা, রেট ও যোগাযোগ`,
+    body: `
+      <style>
+        .ad-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:14px 0 22px; }
+        .ad-card { border:1px solid #cfe3d6; border-radius:10px; padding:14px 16px; background:#f7fbf8; }
+        .ad-card h3 { margin:0 0 6px; font-size:16px; color:#1a5276; }
+        .ad-card .ad-price { font-size:20px; font-weight:bold; color:#2e8b57; margin:4px 0; }
+        .ad-card p { margin:4px 0; font-size:14px; line-height:1.6; }
+        .ad-offer { background:#fff4e5; border:1px dashed #e67e22; border-radius:10px; padding:12px 16px; margin:18px 0; font-size:15px; }
+        .ad-package { border:2px solid #2e8b57; border-radius:10px; padding:16px; margin:18px 0; background:#f2faf5; }
+        .ad-btns { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+        .ad-btn { display:inline-block; padding:10px 18px; border-radius:8px; color:#fff !important; text-decoration:none; font-weight:bold; font-size:15px; }
+      </style>
+      <h1 style="border-bottom:2px solid #1a5276;padding-bottom:10px;">বিজ্ঞাপন দিন</h1>
+      <div class="body-text" style="margin-top:16px;">
+        <p>অনলাইন নিউজ পোর্টাল ${escapeHtml(SITE_TITLE)}-এ বিজ্ঞাপন দিয়ে আপনার প্রতিষ্ঠান, পণ্য বা সেবা সহজেই এলাকার পাঠকদের কাছে পৌঁছে দিন। আমাদের ওয়েবসাইট ও Facebook পেজে প্রতিদিন পাঠকেরা স্থানীয় ও জাতীয় সংবাদ পড়েন।</p>
+
+        <div class="ad-offer">🎁 <strong>বিশেষ অফার:</strong> নতুন বিজ্ঞাপনদাতাদের জন্য প্রথম মাসে <strong>৫০% ছাড়</strong>।</div>
+
+        <h2>ওয়েবসাইট বিজ্ঞাপন (মাসিক)</h2>
+        <div class="ad-cards">
+          <div class="ad-card"><h3>হোমপেজ বিজ্ঞাপন বক্স</h3><div class="ad-price">২,৫০০ টাকা</div><p>হোমপেজের পাশের বক্সে পুরো মাস আপনার বিজ্ঞাপন।</p></div>
+          <div class="ad-card"><h3>সংবাদের নিচে বিজ্ঞাপন</h3><div class="ad-price">২,০০০ টাকা</div><p>প্রতিটি সংবাদ পাতার নিচে পুরো মাস আপনার বিজ্ঞাপন।</p></div>
+          <div class="ad-card"><h3>হোমপেজ + সংবাদের নিচে</h3><div class="ad-price">৪,০০০ টাকা</div><p>দুই জায়গায় একসাথে, বেশি পাঠকের কাছে পৌঁছানোর জন্য।</p></div>
+        </div>
+
+        <h2>প্রমোশনাল কনটেন্ট</h2>
+        <div class="ad-cards">
+          <div class="ad-card"><h3>প্রতিষ্ঠান পরিচিতি</h3><div class="ad-price">১,০০০ টাকা</div><p>ওয়েবসাইট ও Facebook পেজে আপনার প্রতিষ্ঠানের পরিচিতিমূলক লেখা। স্পষ্টভাবে "বিজ্ঞাপন" হিসেবে চিহ্নিত থাকবে।</p></div>
+          <div class="ad-card"><h3>শুভেচ্ছা বিজ্ঞাপন</h3><div class="ad-price">৫০০–১,৫০০ টাকা</div><p>ঈদ, পূজা, জাতীয় দিবস ও বিশেষ উপলক্ষে শুভেচ্ছা বার্তা।</p></div>
+        </div>
+
+        <div class="ad-package">
+          <h2 style="margin-top:0;">বিশেষ প্যাকেজ: "ব্যবসা প্রচার"</h2>
+          <p>হোমপেজ বিজ্ঞাপন ১ মাস + Facebook পেজে ২টি পোস্ট + ১টি প্রতিষ্ঠান পরিচিতি</p>
+          <div class="ad-price" style="font-size:22px;font-weight:bold;color:#2e8b57;">মাত্র ৩,৫০০ টাকা</div>
+        </div>
+
+        <h2>বিজ্ঞাপনের নিয়ম</h2>
+        <p>সব বিজ্ঞাপন "বিজ্ঞাপন" হিসেবে চিহ্নিত থাকে এবং সংবাদ থেকে আলাদা রাখা হয়। বিভ্রান্তিকর, অবৈধ বা অশালীন কোনো বিজ্ঞাপন গ্রহণ করা হয় না। বিজ্ঞাপন প্রকাশের আগে কর্তৃপক্ষ তা যাচাই করে নেয়।</p>
+
+        <h2>যোগাযোগ</h2>
+        <p><strong>মোঃ আমিনুল ইসলাম</strong>, সম্পাদক<br>
+        মোবাইল: <a href="tel:+8801860317788">০১৮৬০৩১৭৭৮৮</a><br>
+        ইমেইল: <a href="mailto:dainikkorbarta@gmail.com">dainikkorbarta@gmail.com</a></p>
+        <div class="ad-btns">
+          <a class="ad-btn" style="background:#25D366;" href="https://wa.me/8801860317788?text=${encodeURIComponent('আসসালামু আলাইকুম, দৈনিক করবার্তায় বিজ্ঞাপন দিতে চাই।')}" target="_blank" rel="noopener">WhatsApp-এ মেসেজ দিন</a>
+          <a class="ad-btn" style="background:#2e8b57;" href="tel:+8801860317788">সরাসরি কল করুন</a>
+        </div>
       </div>`
   },
   {
