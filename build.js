@@ -31,7 +31,7 @@ const TWISTCIRCLE_BANNER_IMG = '/twistcircle-banner.png';
 const TWISTCIRCLE_LINK = 'https://www.facebook.com/share/1JY87mNj5v/';
 
 function toBnNumber(n){
-  return String(n).split('').map(ch => /\d/.test(ch) ? BN_DIGITS[ch] : ch).join('');
+  return String(n).split('').map(ch => /[0-9]/.test(ch) ? BN_DIGITS[ch] : ch).join('');
 }
 function formatDateBn(d){
   return `${BN_WEEKDAYS[d.getDay()]}, ${toBnNumber(d.getDate())} ${BN_MONTHS[d.getMonth()]} ${toBnNumber(d.getFullYear())}`;
@@ -339,11 +339,69 @@ function topBar(){
   </div>`;
 }
 
+// [নতুন] হেডারের ডান পাশে আজকের দিন, সূর্যোদয় ও সূর্যাস্ত (ঢাকার সময়, প্রতিদিন নিজে থেকে আপডেট হয়)
+function sunBox(){
+  return `<style>
+    .sun-box { position:absolute; right:20px; top:50%; transform:translateY(-50%); border:1px solid #cfe3d6; background:#f7fbf8; border-radius:10px; padding:10px 14px; text-align:left; font-size:13px; line-height:1.8; color:#333; min-width:170px; }
+    .sun-box .sun-day { font-weight:bold; color:#2e8b57; font-size:14px; border-bottom:1px dashed #b9d8c4; margin-bottom:4px; padding-bottom:2px; }
+    @media (max-width: 900px) { .sun-box { position:static; transform:none; margin:6px auto 0; text-align:center; } }
+  </style>
+  <div class="sun-box" id="sun-box">
+    <div class="sun-day" id="sun-day">আজ</div>
+    <div>🌅 সূর্যোদয়: <span id="sun-rise">-</span></div>
+    <div>🌇 সূর্যাস্ত: <span id="sun-set">-</span></div>
+  </div>
+  <script>
+  (function(){
+    var LAT=23.8103, LNG=90.4125, TZ=6; // ঢাকা
+    var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+    var bnWeekdays=['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+    function toBn(n){ return String(n).split('').map(function(ch){ return /[0-9]/.test(ch)?bnDigits[ch]:ch; }).join(''); }
+    function rad(d){ return d*Math.PI/180; }
+    function deg(r){ return r*180/Math.PI; }
+    // NOAA পদ্ধতিতে সূর্যোদয়/সূর্যাস্ত (মিনিট, স্থানীয় সময়)
+    function sunTimes(y,m,d){
+      var a=Math.floor((14-m)/12), yy=y+4800-a, mm=m+12*a-3;
+      var jd=d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;
+      var t=(jd-2451545)/36525;
+      var L0=(280.46646+t*(36000.76983+t*0.0003032))%360;
+      var M=357.52911+t*(35999.05029-0.0001537*t);
+      var e=0.016708634-t*(0.000042037+0.0000001267*t);
+      var C=Math.sin(rad(M))*(1.914602-t*(0.004817+0.000014*t))+Math.sin(rad(2*M))*(0.019993-0.000101*t)+Math.sin(rad(3*M))*0.000289;
+      var omega=125.04-1934.136*t;
+      var lambda=L0+C-0.00569-0.00478*Math.sin(rad(omega));
+      var eps0=23+(26+((21.448-t*(46.815+t*(0.00059-t*0.001813))))/60)/60;
+      var eps=eps0+0.00256*Math.cos(rad(omega));
+      var decl=deg(Math.asin(Math.sin(rad(eps))*Math.sin(rad(lambda))));
+      var yv=Math.tan(rad(eps/2)); yv*=yv;
+      var eqt=4*deg(yv*Math.sin(2*rad(L0))-2*e*Math.sin(rad(M))+4*e*yv*Math.sin(rad(M))*Math.cos(2*rad(L0))-0.5*yv*yv*Math.sin(4*rad(L0))-1.25*e*e*Math.sin(2*rad(M)));
+      var ha=deg(Math.acos(Math.cos(rad(90.833))/(Math.cos(rad(LAT))*Math.cos(rad(decl)))-Math.tan(rad(LAT))*Math.tan(rad(decl))));
+      var noon=720-4*LNG-eqt+TZ*60;
+      return { rise: noon-4*ha, set: noon+4*ha };
+    }
+    function fmt(mins, isRise){
+      var total=Math.round(mins), h=Math.floor(total/60), mi=total%60;
+      var label = isRise ? (h<6?'ভোর':'সকাল') : (h<18?'বিকেল':'সন্ধ্যা');
+      var h12 = h>12 ? h-12 : h;
+      return label+' '+toBn(h12)+'টা '+toBn(mi<10?'0'+mi:mi)+' মিনিটে';
+    }
+    // দর্শক যে দেশেই থাকুন, ঢাকার তারিখ অনুযায়ী দেখাবে
+    var now=new Date();
+    var dhaka=new Date(now.getTime()+now.getTimezoneOffset()*60000+TZ*3600000);
+    var st=sunTimes(dhaka.getFullYear(), dhaka.getMonth()+1, dhaka.getDate());
+    var dayEl=document.getElementById('sun-day');
+    if(dayEl) dayEl.textContent='আজ '+bnWeekdays[dhaka.getDay()];
+    var r=document.getElementById('sun-rise'); if(r) r.textContent=fmt(st.rise,true);
+    var s=document.getElementById('sun-set'); if(s) s.textContent=fmt(st.set,false);
+  })();
+  </script>`;
+}
+
 // [পরিবর্তিত] মাঝের তারিখ এখন বঙ্গাব্দে (যেমন: সোমবার, ১৩ আশ্বিন ১৪৩৩ বঙ্গাব্দ)
 function siteHeader(){
   return `${topBar()}
   <header class="masthead">
-    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:20px;">
+    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:20px;position:relative;">
       <a href="/" style="text-decoration:none;color:inherit;">
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
           <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
@@ -358,7 +416,7 @@ function siteHeader(){
           var bnCalMonths=['বৈশাখ','জ্যৈষ্ঠ','আষাঢ়','শ্রাবণ','ভাদ্র','আশ্বিন','কার্তিক','অগ্রহায়ণ','পৌষ','মাঘ','ফাল্গুন','চৈত্র'];
           var enMonths=['January','February','March','April','May','June','July','August','September','October','November','December'];
           var hijriMonths=['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
-          function toBn(n){ return String(n).split('').map(function(ch){ return /\d/.test(ch)?bnDigits[ch]:ch; }).join(''); }
+          function toBn(n){ return String(n).split('').map(function(ch){ return /[0-9]/.test(ch)?bnDigits[ch]:ch; }).join(''); }
           function banglaCal(d){
             var y=d.getFullYear();
             var today=Date.UTC(y,d.getMonth(),d.getDate());
@@ -395,6 +453,7 @@ function siteHeader(){
         })();
         </script>
       </a>
+      ${sunBox()}
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
         <p style="margin:0;font-size:12px;color:#888;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
         ${searchBox()}
