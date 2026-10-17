@@ -44,7 +44,7 @@ function formatDateTimeBn(d){
   return `${formatDateBn(d)}, ${toBnNumber(h)}:${toBnNumber(mm)} ${ampm}`;
 }
 function formatDateEn(d){
-  return `${d.getDate()} ${EN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${toBnNumber(d.getDate())} ${BN_MONTHS[d.getMonth()]} ${toBnNumber(d.getFullYear())}`;
 }
 
 // [নতুন] বাংলাদেশের সংশোধিত বাংলা বর্ষপঞ্জি (১৪ এপ্রিল = ১ বৈশাখ) অনুযায়ী বঙ্গাব্দ
@@ -414,7 +414,7 @@ function siteHeader(){
           var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
           var bnWeekdays=['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
           var bnCalMonths=['বৈশাখ','জ্যৈষ্ঠ','আষাঢ়','শ্রাবণ','ভাদ্র','আশ্বিন','কার্তিক','অগ্রহায়ণ','পৌষ','মাঘ','ফাল্গুন','চৈত্র'];
-          var enMonths=['January','February','March','April','May','June','July','August','September','October','November','December'];
+          var enMonths=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
           var hijriMonths=['মহররম','সফর','রবিউল আউয়াল','রবিউস সানি','জমাদিউল আউয়াল','জমাদিউস সানি','রজব','শাবান','রমজান','শাওয়াল','জিলকদ','জিলহজ'];
           function toBn(n){ return String(n).split('').map(function(ch){ return /[0-9]/.test(ch)?bnDigits[ch]:ch; }).join(''); }
           function banglaCal(d){
@@ -429,7 +429,7 @@ function siteHeader(){
             while(m<11&&days>=lengths[m]){ days-=lengths[m]; m++; }
             return bnWeekdays[d.getDay()]+', '+toBn(days+1)+' '+bnCalMonths[m]+' '+toBn(startYear-593)+' বঙ্গাব্দ';
           }
-          function enDate(d){ return d.getDate()+' '+enMonths[d.getMonth()]+' '+d.getFullYear(); }
+          function enDate(d){ return toBn(d.getDate())+' '+enMonths[d.getMonth()]+' '+toBn(d.getFullYear()); }
           function toHijri(date){
             var day=date.getDate(), month=date.getMonth()+1, year=date.getFullYear();
             var jd=Math.floor((1461*(year+4800+Math.floor((month-14)/12)))/4)+Math.floor((367*(month-2-12*Math.floor((month-14)/12)))/12)-Math.floor((3*Math.floor((year+4900+Math.floor((month-14)/12))/100))/4)+day-32075;
