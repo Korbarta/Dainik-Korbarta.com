@@ -408,7 +408,7 @@ function siteHeader(){
           <h1 style="margin:0;text-align:center;">${escapeHtml(SITE_TITLE)}</h1>
         </div>
         <p class="tagline" style="margin:6px auto 0;text-align:center;">${escapeHtml(SITE_TAGLINE)}</p>
-        <p id="today-date" style="margin:6px auto 0;font-size:11px;color:#888;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatBanglaCalBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
+        <p id="today-date" style="margin:8px auto 0;font-size:15px;color:#555;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatBanglaCalBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
         <script>
         (function(){
           var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
@@ -455,7 +455,7 @@ function siteHeader(){
       </a>
       ${sunBox()}
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
-        <p style="margin:0;font-size:12px;color:#888;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
+        <p style="margin:0;font-size:14px;color:#555;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
         ${searchBox()}
       </div>
     </div>
