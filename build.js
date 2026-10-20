@@ -243,7 +243,9 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     .breaking-track { display:inline-block; white-space:nowrap; animation: marquee 25s linear infinite; }
     .home-grid { display:grid; grid-template-columns:190px minmax(0,1fr) 300px; gap:24px; align-items:start; }
-    .home-grid .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
+    /* [পরিবর্তিত] কম্পিউটারে খবর পাশাপাশি ৩টি করে; ছোট স্ক্রিনে ২টি, মোবাইলে ১টি */
+    .home-grid .news-grid { grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
+    @media (max-width: 1250px) { .home-grid .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
     .promo-col { position:sticky; top:12px; }
     @media (max-width: 1050px) {
       .home-grid { grid-template-columns:190px minmax(0,1fr); }
