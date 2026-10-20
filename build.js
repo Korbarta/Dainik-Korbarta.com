@@ -247,9 +247,11 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .home-grid .news-grid { grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
     @media (max-width: 1250px) { .home-grid .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
     .promo-col { position:sticky; top:12px; }
+    /* [নতুন] কম্পিউটারে ডানের "সর্বশেষ" স্ক্রল করার সময় সাথে সাথে থাকবে, ফলে নিচে ফাঁকা দেখাবে না */
+    .home-grid > .sidebar-col { position:sticky; top:12px; }
     @media (max-width: 1050px) {
       .home-grid { grid-template-columns:190px minmax(0,1fr); }
-      .home-grid > .sidebar-col { grid-column:1 / -1; }
+      .home-grid > .sidebar-col { grid-column:1 / -1; position:static; }
     }
     @media (max-width: 800px) {
       .home-grid { grid-template-columns:minmax(0,1fr); }
