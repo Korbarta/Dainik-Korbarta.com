@@ -400,11 +400,27 @@ function sunBox(){
 // [পরিবর্তিত] মাঝের তারিখ এখন বঙ্গাব্দে (যেমন: সোমবার, ১৩ আশ্বিন ১৪৩৩ বঙ্গাব্দ)
 function siteHeader(){
   return `${topBar()}
+  <style>
+    /* [নতুন] মোবাইলে হেডার ছোট ও ফাঁকা জায়গা কম */
+    @media (max-width: 600px) {
+      .masthead { padding:6px 0 8px !important; }
+      .masthead .mh-wrap { padding:8px 12px !important; gap:4px !important; }
+      .masthead .mh-brand { gap:10px !important; }
+      .masthead .mh-logo { height:44px !important; width:44px !important; }
+      .masthead h1 { font-size:1.9rem !important; line-height:1.2; }
+      .masthead .tagline { font-size:14px; margin-top:2px !important; }
+      .masthead #today-date { font-size:12.5px !important; margin-top:4px !important; line-height:1.5; }
+      .masthead .sun-box { display:flex; flex-wrap:wrap; justify-content:center; gap:2px 12px; padding:5px 10px; margin-top:2px !important; font-size:12px; line-height:1.6; min-width:0; border-radius:8px; }
+      .masthead .sun-box .sun-day { width:100%; font-size:12.5px; margin-bottom:2px; padding-bottom:1px; }
+      .masthead .mh-meta { gap:6px !important; }
+      .masthead .mh-meta p { font-size:12px !important; }
+    }
+  </style>
   <header class="masthead">
-    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:20px;position:relative;">
+    <div class="wrap mh-wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:20px;position:relative;">
       <a href="/" style="text-decoration:none;color:inherit;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
-          <img src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
+        <div class="mh-brand" style="display:flex;align-items:center;justify-content:center;gap:14px;">
+          <img class="mh-logo" src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
           <h1 style="margin:0;text-align:center;">${escapeHtml(SITE_TITLE)}</h1>
         </div>
         <p class="tagline" style="margin:6px auto 0;text-align:center;">${escapeHtml(SITE_TAGLINE)}</p>
@@ -454,7 +470,7 @@ function siteHeader(){
         </script>
       </a>
       ${sunBox()}
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
+      <div class="mh-meta" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
         <p style="margin:0;font-size:14px;color:#555;">সর্বশেষ আপডেট: ${formatDateTimeBn(BUILD_TIME)}</p>
         ${searchBox()}
       </div>
