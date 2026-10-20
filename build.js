@@ -279,7 +279,8 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .news-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; }
     @media (max-width: 900px) { .news-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
     @media (max-width: 520px) { .news-grid { grid-template-columns:minmax(0,1fr); } }
-    .hero-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center top; display:block; border-radius:8px; margin-bottom:12px; background:#f0f4f2; }
+    .hero-img { width:100%; aspect-ratio:16/9; max-height:280px; object-fit:contain; object-position:center; display:block; border-radius:8px; margin-bottom:12px; background:#f0f4f2; }
+    /* [পরিবর্তিত] প্রধান খবরের ছবি সর্বোচ্চ ২৮০ পিক্সেল উঁচু; ছবির কোনো অংশ কাটবে না (ফাঁকা অংশে হালকা রং), যাতে খাড়া বা বড় ছবিতেও শিরোনাম প্রথম স্ক্রিনেই দেখা যায় */
     .article-img { width:100%; aspect-ratio:16/9; object-fit:cover; object-position:center top; display:block; border-radius:8px; margin-bottom:16px; background:#f0f4f2; }
     .news-card { display:flex; flex-direction:column; text-decoration:none; color:inherit; background:#fff; border:1px solid #e6e6e6; border-radius:8px; overflow:hidden; }
     .news-card:hover { border-color:#1a5276; }
