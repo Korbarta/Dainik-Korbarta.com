@@ -315,8 +315,11 @@ function categoryNav(){
   const links = NAV_ORDER.map(c =>
     `<a href="/category/${catSlugify(c)}/" style="padding:8px 14px;text-decoration:none;color:#222;font-size:14px;white-space:nowrap;">${escapeHtml(c)}</a>`
   ).join('');
-  return `<nav style="border-top:1px solid #eee;border-bottom:1px solid #eee;overflow-x:auto;white-space:nowrap;background:#fafafa;">
-    <a href="/" style="padding:8px 14px;text-decoration:none;color:#1a5276;font-weight:bold;font-size:14px;">প্রচ্ছদ</a><a href="/" style="padding:8px 14px;text-decoration:none;color:#222;font-size:14px;white-space:nowrap;">সর্বশেষ</a>${links}
+  // [পরিবর্তিত] মেনু মাঝখানে (দুই পাশে সমান জায়গা), নিচে একটি স্পষ্ট লাইন; জায়গা কম হলে আগের মতো পাশে স্ক্রল হবে
+  return `<nav style="border-top:1px solid #eee;border-bottom:2px solid #1a5276;overflow-x:auto;white-space:nowrap;background:#fafafa;">
+    <div style="display:flex;width:max-content;margin:0 auto;">
+    <a href="/" style="padding:8px 14px;text-decoration:none;color:#1a5276;font-weight:bold;font-size:14px;white-space:nowrap;">প্রচ্ছদ</a><a href="/" style="padding:8px 14px;text-decoration:none;color:#222;font-size:14px;white-space:nowrap;">সর্বশেষ</a>${links}
+    </div>
   </nav>`;
 }
 
