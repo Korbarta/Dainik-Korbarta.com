@@ -337,7 +337,7 @@ function searchBox(){
 
 function topBar(){
   return `<div style="background:#f5f5f5;border-bottom:1px solid #eee;">
-    <div class="wrap" style="display:flex;justify-content:flex-end;padding:6px 20px;">
+    <div class="wrap" style="display:flex;justify-content:flex-end;padding:4px 20px;">
       <a href="/epaper/" style="font-size:13px;color:#1a5276;text-decoration:none;font-weight:bold;">📰 ই-পেপার</a>
     </div>
   </div>`;
@@ -405,6 +405,8 @@ function sunBox(){
 function siteHeader(){
   return `${topBar()}
   <style>
+    /* [নতুন] কম্পিউটারে হেডারের উপর-নিচের ফাঁকা জায়গা কমানো (নকশা আগের মতোই) */
+    .masthead { padding:0 0 6px; }
     /* [নতুন] মোবাইলে হেডার ছোট ও ফাঁকা জায়গা কম */
     @media (max-width: 600px) {
       .masthead { padding:6px 0 8px !important; }
@@ -421,14 +423,14 @@ function siteHeader(){
     }
   </style>
   <header class="masthead">
-    <div class="wrap mh-wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:20px;position:relative;">
+    <div class="wrap mh-wrap" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:6px 20px 10px;position:relative;">
       <a href="/" style="text-decoration:none;color:inherit;">
         <div class="mh-brand" style="display:flex;align-items:center;justify-content:center;gap:14px;">
           <img class="mh-logo" src="/logo.png" alt="${escapeHtml(SITE_TITLE)}" style="height:64px;width:64px;border-radius:50%;flex-shrink:0;">
           <h1 style="margin:0;text-align:center;">${escapeHtml(SITE_TITLE)}</h1>
         </div>
-        <p class="tagline" style="margin:6px auto 0;text-align:center;">${escapeHtml(SITE_TAGLINE)}</p>
-        <p id="today-date" style="margin:8px auto 0;font-size:15px;color:#555;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatBanglaCalBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
+        <p class="tagline" style="margin:2px auto 0;text-align:center;">${escapeHtml(SITE_TAGLINE)}</p>
+        <p id="today-date" style="margin:4px auto 0;font-size:15px;color:#555;text-align:center;">${formatDateEn(BUILD_TIME)} | ${formatBanglaCalBn(BUILD_TIME)} | ${formatHijriBn(BUILD_TIME)}</p>
         <script>
         (function(){
           var bnDigits=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
