@@ -20,7 +20,9 @@ const BANGLA_CAL_MONTHS = ['বৈশাখ','জ্যৈষ্ঠ','আষা�
 const CATEGORY_ORDER = ['সারাদেশ','জাতীয়','অর্থনীতি','খেলা','বিনোদন','রাজনীতি','বিজ্ঞান ও প্রযুক্তি','আন্তর্জাতিক','যোগাযোগ','মতামত','সাহিত্য পাতা'];
 
 // [নতুন] 'সাহিত্য পাতা' যোগ করা হয়েছে (কোনো লেখা না থাকলেও মেনুতে দেখাবে)
-const NAV_EXTRA_CATEGORIES = ['রাজনীতি','বিজ্ঞান ও প্রযুক্তি','স্বাস্থ্য','পাঠক সংবাদ','জেলা সংবাদ','মফস্বল সংবাদ','সাহিত্য পাতা'];
+// [পরিবর্তিত] মেনুর বিভাগগুলো ঠিক এই ক্রমে দেখাবে (প্রচ্ছদ ও সর্বশেষ-এর পরে)
+const NAV_ORDER = ['সারাদেশ','জাতীয়','রাজনীতি','অর্থনীতি','বাণিজ্য','আন্তর্জাতিক','জেলা সংবাদ','স্বাস্থ্য','বিজ্ঞান ও প্রযুক্তি','খেলা','বিনোদন','মফস্বল সংবাদ','সাহিত্য পাতা','পাঠক সংবাদ','মতামত'];
+const NAV_EXTRA_CATEGORIES = NAV_ORDER;
 
 // [নতুন] খবরের পাতার তারিখের রং (হালকা সবুজ, গাঢ় নয়)
 const DATE_COLOR = '#43A047';
@@ -251,6 +253,8 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
       .home-grid { grid-template-columns:minmax(0,1fr); }
       .promo-col { position:static; }
       .promo-box { min-height:0; }
+      /* [নতুন] মোবাইলে আগে খবর, তারপর বিজ্ঞাপন বক্স, শেষে সর্বশেষ */
+      .home-grid > .news-col { order:-1; }
     }
     @media (max-width: 520px) { .home-grid .news-grid { grid-template-columns:minmax(0,1fr); } }
     .promo-box { width:100%; min-height:288px; box-sizing:border-box; background:#EAF3DE; border:2px solid #3B6D11; border-radius:8px; padding:14px 10px; text-align:center; display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
@@ -304,7 +308,7 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
 }
 
 function categoryNav(){
-  const links = categories.map(c =>
+  const links = NAV_ORDER.map(c =>
     `<a href="/category/${catSlugify(c)}/" style="padding:8px 14px;text-decoration:none;color:#222;font-size:14px;white-space:nowrap;">${escapeHtml(c)}</a>`
   ).join('');
   return `<nav style="border-top:1px solid #eee;border-bottom:1px solid #eee;overflow-x:auto;white-space:nowrap;background:#fafafa;">
@@ -738,7 +742,7 @@ function homePageHtml(){
   ${siteHeader()}
   <main class="wrap home-grid" style="max-width:1400px;padding:24px 20px 60px;">
     ${promoBox()}
-    <div style="min-width:0;">
+    <div class="news-col" style="min-width:0;">
       ${hero ? articleCard(hero, true) : '<p>এখনো কোনো সংবাদ প্রকাশিত হয়নি।</p>'}
       <div class="news-grid" style="margin-top:20px;">${rowCards}</div>
     </div>
