@@ -415,6 +415,8 @@ function siteHeader(){
   <style>
     /* [নতুন] কম্পিউটারে হেডারের উপর-নিচের ফাঁকা জায়গা কমানো (নকশা আগের মতোই) */
     .masthead { padding:0 0 6px; }
+    /* [নতুন] হেডারের পটভূমি সবুজ (লোগোর রঙের সাথে মিলিয়ে) */
+    .masthead { background:linear-gradient(180deg,#d9eec8 0%,#bfe0a6 100%); }
     /* [নতুন] মোবাইলে হেডার ছোট ও ফাঁকা জায়গা কম */
     @media (max-width: 600px) {
       .masthead { padding:6px 0 8px !important; }
