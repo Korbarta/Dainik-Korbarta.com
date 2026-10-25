@@ -220,6 +220,7 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
   const updated = updatedIso || BUILD_TIME.toISOString();
   return `<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7391506783919297" crossorigin="anonymous"></script>
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeHtml(desc)}">
   <link rel="canonical" href="${canonical}">
@@ -1010,6 +1011,9 @@ fs.writeFileSync('robots.txt', `User-agent: *
 Allow: /
 Disallow: /admin/
 Sitemap: ${SITE_URL}/sitemap.xml
+`);
+
+fs.writeFileSync('ads.txt', `google.com, pub-7391506783919297, DIRECT, f08c47fec0942fa0
 `);
 
 console.log(`✓ Build সম্পূর্ণ – ${articles.length}টি আর্টিকেল, ${categories.length}টি ক্যাটাগরি পেজ তৈরি হয়েছে`);
