@@ -292,6 +292,10 @@ function pageHead(title, desc, canonical, ogImage, extraHead, ogType, updatedIso
     .news-card .card-title { font-size:1rem; margin:4px 0 6px; line-height:1.45; }
     .news-card .card-excerpt { font-size:13.5px; color:#555; margin:0 0 8px; line-height:1.55; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
     .news-card .meta { margin-top:auto; font-size:12px; }
+    .share-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:26px 0 0; padding:14px 0; border-top:1px solid #e6e6e6; border-bottom:1px solid #e6e6e6; }
+    .share-label { font-weight:700; color:#1a5276; margin-right:4px; }
+    .share-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:6px; color:#fff !important; text-decoration:none; font-size:14px; font-family:inherit; border:0; cursor:pointer; line-height:1; }
+    .share-btn:hover { opacity:.88; }
     .related-news { margin-top:36px; padding-top:18px; border-top:2px solid #1a5276; }
     .related-news h2 { margin:0 0 14px; font-size:1.25rem; color:#1a5276; }
     .related-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; }
@@ -579,6 +583,7 @@ function articlePageHtml(a, urlPath){
     <h1 style="font-size:clamp(1.5rem,4vw,2.1rem);margin:10px 0 12px;line-height:1.35;">${escapeHtml(a.title)}</h1>
     <div class="meta"><strong style="color:${DATE_COLOR};font-weight:700;">${formatDateBn(d)}</strong>${a.reporter ? ' | প্রতিবেদক: ' + escapeHtml(a.reporter) : ''}</div>
     <div class="body-text" style="margin-top:20px;">${bodyToHtml(a.body)}</div>
+    ${shareButtons(a, canonical)}
     ${relatedNews(a)}
     ${twistcircleBanner('article')}
     ${adBanner()}
@@ -586,6 +591,29 @@ function articlePageHtml(a, urlPath){
   ${siteFooter()}
 </body>
 </html>`;
+}
+
+// [নতুন] প্রতিটি খবরের নিচে সামাজিক মাধ্যমে শেয়ার করার বাটন
+// (Facebook, WhatsApp, Messenger-এর বদলে Telegram, X এবং লিংক কপি — কোনো বাইরের স্ক্রিপ্ট লাগে না)
+function shareButtons(a, canonical){
+  const u = encodeURIComponent(canonical);
+  const t = encodeURIComponent(String(a.title || ''));
+  const ic = (d) => `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="${d}"/></svg>`;
+  const FB = 'M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z';
+  const XX = 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z';
+  const WA = 'M12 2a10 10 0 0 0-8.66 15l-1.32 4.98 5.1-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.87l-.3-.18-2.75.7.72-2.66-.2-.32A8 8 0 0 1 12 4zm-3.1 3.6c-.2 0-.5.07-.75.35-.26.28-.98.96-.98 2.33s1 2.7 1.14 2.89c.14.18 1.95 3.1 4.8 4.22 2.37.94 2.85.75 3.37.7.51-.05 1.66-.68 1.9-1.33.23-.66.23-1.22.16-1.33-.07-.12-.26-.19-.54-.33-.28-.14-1.66-.82-1.92-.91-.26-.1-.44-.14-.63.14-.19.28-.72.91-.89 1.1-.16.18-.33.2-.6.07-.29-.14-1.2-.45-2.28-1.41-.84-.75-1.41-1.68-1.58-1.96-.16-.28-.02-.43.13-.57.12-.13.28-.33.42-.5.14-.16.19-.28.28-.46.1-.19.05-.35-.02-.5-.07-.13-.62-1.52-.87-2.08-.22-.53-.45-.46-.62-.47h-.5z';
+  const TG = 'M21.5 3.2 2.9 10.4c-1.27.5-1.26 1.2-.23 1.52l4.78 1.49 1.84 5.6c.22.62.11.86.76.86.5 0 .72-.23 1-.5l2.3-2.24 4.79 3.54c.88.49 1.52.24 1.74-.82l3.14-14.8c.32-1.29-.5-1.87-1.52-1.85zM8.9 13.2l9.27-5.85c.46-.28.89-.13.54.18l-7.95 7.17-.31 3.3z';
+  const LK = 'M10.6 13.4a1 1 0 0 1 0-1.4l3.4-3.4a1 1 0 1 1 1.4 1.4L12 13.4a1 1 0 0 1-1.4 0zM13 6.5l1.4-1.4a4 4 0 0 1 5.6 5.6L18.6 12a1 1 0 0 1-1.4-1.4l1.4-1.4a2 2 0 0 0-2.8-2.8L14.4 7.9A1 1 0 0 1 13 6.5zm-2 11-1.4 1.4a4 4 0 0 1-5.6-5.6L5.4 12a1 1 0 0 1 1.4 1.4L5.4 14.8a2 2 0 0 0 2.8 2.8l1.4-1.4a1 1 0 0 1 1.4 1.4z';
+  const btn = (href, bg, d, label) =>
+    `<a href="${href}" target="_blank" rel="noopener" class="share-btn" style="background:${bg};">${ic(d)}<span>${label}</span></a>`;
+  return `<div class="share-bar">
+    <span class="share-label">শেয়ার করুন:</span>
+    ${btn('https://www.facebook.com/sharer/sharer.php?u=' + u, '#1877F2', FB, 'Facebook')}
+    ${btn('https://wa.me/?text=' + t + '%20' + u, '#25D366', WA, 'WhatsApp')}
+    ${btn('https://t.me/share/url?url=' + u + '&text=' + t, '#229ED9', TG, 'Telegram')}
+    ${btn('https://twitter.com/intent/tweet?url=' + u + '&text=' + t, '#000000', XX, 'X')}
+    <button type="button" class="share-btn" style="background:#555;" onclick="(function(b){var l=${escapeHtml(JSON.stringify(canonical))};function ok(){b.querySelector('span').textContent='কপি হয়েছে';setTimeout(function(){b.querySelector('span').textContent='লিংক কপি';},2000);}if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(l).then(ok,function(){prompt('লিংক কপি করুন:',l);});}else{prompt('লিংক কপি করুন:',l);}})(this)">${ic(LK)}<span>লিংক কপি</span></button>
+  </div>`;
 }
 
 // [নতুন] সম্পর্কিত খবর: প্রথমে একই বিভাগের সর্বশেষ খবর, কম পড়লে অন্য সর্বশেষ খবর দিয়ে পূরণ (সর্বোচ্চ ৪টি)
