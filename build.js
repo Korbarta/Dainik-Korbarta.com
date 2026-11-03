@@ -1000,6 +1000,271 @@ staticPages.forEach(p => {
   urls.push(canonical);
 }
 
+// [নতুন] ফটোকার্ড তৈরির পাতা (/photocard/) — শুধু সম্পাদকের ব্যবহারের জন্য
+// খবর বেছে নিলে ব্রাউজারেই ১০৮০×১০৮০ ছবি তৈরি হবে, ডাউনলোড বা সরাসরি ফেসবুকে শেয়ার করা যাবে
+// এই পাতা Google-এ আসবে না (noindex + robots.txt), সাইটম্যাপেও নেই, কোনো মেনুতেও লিংক নেই
+function photocardPageHtml(){
+  const list = sortedArticles.map(a => {
+    const d = new Date(a.date);
+    return {
+      t: String(a.title || ''),
+      c: String(a.category || ''),
+      i: a.image || '',
+      d: isNaN(d.getTime()) ? '' : formatDateBn(d),
+      u: urlOf(a)
+    };
+  });
+  const json = JSON.stringify(list).replace(/</g, '\\u003c');
+  return `<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ফটোকার্ড - ${escapeHtml(SITE_TITLE)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:'Hind Siliguri', sans-serif; background:#f3f6f4; color:#222; }
+    .pc-wrap { max-width:640px; margin:0 auto; padding:16px; }
+    h1 { font-size:1.4rem; margin:4px 0 4px; color:#1a5276; }
+    .pc-hint { margin:0 0 14px; color:#555; font-size:14px; }
+    .pc-search { width:100%; padding:12px; font-size:16px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px; font-family:inherit; }
+    .pc-list { max-height:260px; overflow-y:auto; background:#fff; border:1px solid #ddd; border-radius:8px; }
+    .pc-item { display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid #eee; padding:10px 12px; font-size:15px; font-family:inherit; cursor:pointer; line-height:1.45; }
+    .pc-item small { display:block; color:#777; font-size:12px; }
+    .pc-item.active { background:#EAF3DE; }
+    .pc-edit { margin-top:14px; }
+    .pc-edit label { font-size:14px; color:#444; }
+    .pc-edit textarea { width:100%; font-size:16px; padding:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit; margin-top:4px; }
+    .pc-styles { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+    .pc-styles button { flex:1; min-width:90px; padding:10px; border:2px solid #ccc; border-radius:8px; background:#fff; font-family:inherit; font-size:14px; cursor:pointer; }
+    .pc-styles button.on { border-color:#3B6D11; background:#EAF3DE; font-weight:700; }
+    canvas { width:100%; height:auto; display:block; margin-top:14px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.15); background:#fff; }
+    .pc-actions { display:flex; gap:10px; margin-top:14px; }
+    .pc-actions button { flex:1; padding:14px; font-size:16px; font-family:inherit; font-weight:700; border:0; border-radius:8px; color:#fff; cursor:pointer; }
+    .pc-dl { background:#3B6D11; }
+    .pc-share { background:#1a5276; }
+    .pc-msg { margin-top:10px; font-size:14px; color:#993C1D; min-height:1em; }
+  </style>
+</head>
+<body>
+  <div class="pc-wrap">
+    <h1>ফটোকার্ড তৈরি</h1>
+    <p class="pc-hint">খবর বেছে নিন → ফটোকার্ড তৈরি হবে → ডাউনলোড বা শেয়ার করুন।</p>
+    <input class="pc-search" id="pcSearch" type="search" placeholder="খবর খুঁজুন…">
+    <div class="pc-list" id="pcList"></div>
+    <div class="pc-edit">
+      <label for="pcTitle">শিরোনাম (দরকার হলে ছোট করে লিখুন):</label>
+      <textarea id="pcTitle" rows="3"></textarea>
+    </div>
+    <div class="pc-styles" id="pcStyles">
+      <button type="button" data-s="green" class="on">সবুজ</button>
+      <button type="button" data-s="red">লাল (ব্রেকিং)</button>
+      <button type="button" data-s="blue">নীল</button>
+    </div>
+    <canvas id="pcCanvas" width="1080" height="1080"></canvas>
+    <div class="pc-actions">
+      <button type="button" class="pc-dl" id="pcDownload">ডাউনলোড</button>
+      <button type="button" class="pc-share" id="pcShare">শেয়ার</button>
+    </div>
+    <p class="pc-msg" id="pcMsg"></p>
+  </div>
+  <script>
+  (function(){
+    var NEWS = ${json};
+    var SITE_NAME = ${JSON.stringify(SITE_TITLE)};
+    var SITE_DOMAIN = 'dainikkorbarta.com';
+    var THEMES = {
+      green: { band:'#27500A', accent:'#7CB342', tag:'#993C1D' },
+      red:   { band:'#8E1B1B', accent:'#F4B400', tag:'#1a5276' },
+      blue:  { band:'#1a3a5c', accent:'#4FC3F7', tag:'#993C1D' }
+    };
+    var FONT = "'Hind Siliguri', sans-serif";
+    var canvas = document.getElementById('pcCanvas');
+    var ctx = canvas.getContext('2d');
+    var listEl = document.getElementById('pcList');
+    var titleEl = document.getElementById('pcTitle');
+    var msgEl = document.getElementById('pcMsg');
+    var current = null, theme = 'green', imgCache = {}, logo = null, drawToken = 0;
+
+    function loadImg(src){
+      return new Promise(function(res){
+        if (!src) return res(null);
+        if (imgCache[src]) return res(imgCache[src]);
+        var im = new Image();
+        im.onload = function(){ imgCache[src] = im; res(im); };
+        im.onerror = function(){ res(null); };
+        im.src = src;
+      });
+    }
+
+    function wrapLines(text, maxW){
+      var words = String(text).replace(/\\s+/g,' ').trim().split(' ');
+      var lines = [], line = '';
+      words.forEach(function(w){
+        var test = line ? line + ' ' + w : w;
+        if (ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; }
+        else line = test;
+      });
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function coverDraw(im, x, y, w, h){
+      var r = Math.max(w / im.width, h / im.height);
+      var sw = w / r, sh = h / r;
+      var sx = (im.width - sw) / 2;
+      var sy = Math.max(0, (im.height - sh) * 0.2); // উপরের দিক বেশি রাখা, যাতে মাথা না কাটে
+      ctx.drawImage(im, sx, sy, sw, sh, x, y, w, h);
+    }
+
+    function roundRect(x, y, w, h, r){
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+
+    async function draw(){
+      if (!current) return;
+      var token = ++drawToken;
+      var th = THEMES[theme];
+      var W = 1080, H = 1080, PHOTO_H = 600;
+      var photo = await loadImg(current.i);
+      if (token !== drawToken) return;
+
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+
+      // ছবি
+      if (photo) coverDraw(photo, 0, 0, W, PHOTO_H);
+      else {
+        ctx.fillStyle = '#EAF3DE'; ctx.fillRect(0, 0, W, PHOTO_H);
+        if (logo) ctx.drawImage(logo, W/2 - 150, PHOTO_H/2 - 150, 300, 300);
+      }
+
+      // উপরে বাম কোণে লোগো ও নাম
+      ctx.fillStyle = 'rgba(255,255,255,0.93)';
+      roundRect(28, 28, 400, 96, 48); ctx.fill();
+      if (logo){
+        ctx.save(); ctx.beginPath(); ctx.arc(76, 76, 40, 0, Math.PI*2); ctx.clip();
+        ctx.drawImage(logo, 36, 36, 80, 80); ctx.restore();
+      }
+      ctx.fillStyle = th.band; ctx.font = '700 44px ' + FONT;
+      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      ctx.fillText(SITE_NAME, 130, 80);
+
+      // শিরোনামের অংশ
+      ctx.fillStyle = th.band; ctx.fillRect(0, PHOTO_H, W, H - PHOTO_H);
+      ctx.fillStyle = th.accent; ctx.fillRect(0, PHOTO_H, W, 12);
+
+      // বিভাগ ট্যাগ
+      if (current.c){
+        ctx.font = '700 32px ' + FONT;
+        var tw = ctx.measureText(current.c).width + 44;
+        ctx.fillStyle = th.tag; roundRect(48, PHOTO_H - 30, tw, 58, 10); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
+        ctx.fillText(current.c, 70, PHOTO_H);
+      }
+
+      // শিরোনাম — লম্বা হলে ফন্ট ছোট হবে
+      var title = titleEl.value.trim() || current.t;
+      var maxW = W - 110, size = 64, lines;
+      for (; size >= 38; size -= 2){
+        ctx.font = '700 ' + size + 'px ' + FONT;
+        lines = wrapLines(title, maxW);
+        if (lines.length * size * 1.4 <= 300) break;
+      }
+      ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+      var lh = size * 1.4;
+      var blockH = lines.length * lh;
+      var startY = PHOTO_H + 50 + Math.max(0, (300 - blockH) / 2);
+      lines.forEach(function(l, k){ ctx.fillText(l, W/2, startY + k * lh); });
+
+      // নিচের লাইন: তারিখ ও ওয়েবসাইট
+      ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(0, H - 100, W, 100);
+      ctx.font = '500 32px ' + FONT; ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left'; ctx.fillText(current.d, 48, H - 50);
+      ctx.textAlign = 'right'; ctx.fillText('বিস্তারিত কমেন্টে  |  ' + SITE_DOMAIN, W - 48, H - 50);
+      ctx.textAlign = 'left';
+    }
+
+    function renderList(q){
+      q = (q || '').trim();
+      listEl.innerHTML = '';
+      NEWS.filter(function(n){ return !q || n.t.indexOf(q) !== -1; }).slice(0, 60).forEach(function(n){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'pc-item' + (n === current ? ' active' : '');
+        b.textContent = n.t;
+        var s = document.createElement('small'); s.textContent = (n.c ? n.c + ' · ' : '') + n.d;
+        b.appendChild(s);
+        b.onclick = function(){ select(n); };
+        listEl.appendChild(b);
+      });
+    }
+
+    function select(n){
+      current = n; titleEl.value = n.t; msgEl.textContent = '';
+      renderList(document.getElementById('pcSearch').value);
+      draw();
+    }
+
+    function fileName(){
+      return 'photocard-' + (current ? current.u.replace(/[^0-9a-z]/gi,'') : 'news') + '.png';
+    }
+
+    function toBlob(){ return new Promise(function(res){ canvas.toBlob(res, 'image/png'); }); }
+
+    document.getElementById('pcDownload').onclick = async function(){
+      if (!current){ msgEl.textContent = 'আগে একটি খবর বেছে নিন।'; return; }
+      var blob = await toBlob();
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = fileName();
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+      msgEl.textContent = 'ডাউনলোড হয়েছে — ফোনের Downloads বা গ্যালারিতে পাবেন।';
+    };
+
+    document.getElementById('pcShare').onclick = async function(){
+      if (!current){ msgEl.textContent = 'আগে একটি খবর বেছে নিন।'; return; }
+      var blob = await toBlob();
+      var file = new File([blob], fileName(), { type:'image/png' });
+      if (navigator.canShare && navigator.canShare({ files:[file] })){
+        try { await navigator.share({ files:[file], text: (titleEl.value.trim() || current.t) }); }
+        catch(e){}
+      } else {
+        msgEl.textContent = 'এই ব্রাউজারে সরাসরি শেয়ার হয় না — ডাউনলোড করে পোস্ট করুন।';
+      }
+    };
+
+    document.getElementById('pcSearch').oninput = function(){ renderList(this.value); };
+    titleEl.oninput = function(){ draw(); };
+    Array.prototype.forEach.call(document.querySelectorAll('#pcStyles button'), function(b){
+      b.onclick = function(){
+        theme = b.getAttribute('data-s');
+        Array.prototype.forEach.call(document.querySelectorAll('#pcStyles button'), function(x){ x.classList.toggle('on', x === b); });
+        draw();
+      };
+    });
+
+    Promise.all([
+      document.fonts ? document.fonts.load('700 40px "Hind Siliguri"') : null,
+      document.fonts ? document.fonts.load('500 40px "Hind Siliguri"') : null,
+      loadImg('/logo.png').then(function(im){ logo = im; })
+    ]).catch(function(){}).then(function(){
+      renderList('');
+      if (NEWS.length) select(NEWS[0]);
+    });
+  })();
+  </script>
+</body>
+</html>`;
+}
+fs.mkdirSync('photocard', { recursive: true });
+fs.writeFileSync(path.join('photocard', 'index.html'), photocardPageHtml());
+
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url><loc>${u}</loc><lastmod>${lastmodMap[u] || BUILD_TIME.toISOString()}</lastmod></url>`).join('\n')}
@@ -1010,6 +1275,7 @@ fs.writeFileSync('sitemap.xml', sitemap);
 fs.writeFileSync('robots.txt', `User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /photocard/
 Sitemap: ${SITE_URL}/sitemap.xml
 `);
 
